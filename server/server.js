@@ -1,5 +1,6 @@
 var express = require('express');
 var path = require('path');
+var bcrypt = require('bcrypt');
 var log = require('./utils/log')(module);
 var config = require('./config.json');
 
@@ -16,6 +17,15 @@ var dbModels = require('./utils/mongo');
 
 var WineModel = dbModels.WineModel;
 var ImageModel = dbModels.ImageModel;
+var UserModel = dbModels.UserModel;
+
+var getHash = function (password) {
+    return bcrypt.hashSync(password, 10);
+};
+
+var verifyPassword = function(password, hash) {
+ return bcrypt.compareSync(password, hash);
+};
 
 
 app.set('port', config.port);
@@ -31,31 +41,65 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(express.static('../client'));
 
-/*app.get('*', function (req, res) {
-
-    var init = "$(document).ready(function() { App.initialize(); });";
-    if (typeof req.session.user !== 'undefined') {
-        init = "$(document).ready(function() { App.user = " + JSON.stringify(req.session.user) + "; App.initialize(); });";
-    }
-
-    fs.readFile('../client/index.html', 'utf8', function(error, content) {
-        if (error) console.log(error);
-        res.writeHead(200, { 'Content-Type': 'text/html' });
-        res.end(content, 'utf-8');
-    });
-});*/
-
 app.listen(config.port, function () {
     console.log('Running on port ' + config.port)
+});
+
+app.post('/login', function(req, res) {
+    return UserModel.findOne({username: req.body.username}, function(err, user) {
+        if (!err) {
+            log.error(req.body.password);
+            log.error(user.toJSON());
+            if (verifyPassword(req.body.password, user.password)) {
+                return res.send(user);
+            }
+            res.statusCode = 404;
+            log.error('Username/password are not matched');
+            return res.send({ error: 'Username/password are not matched' });
+        }
+        res.statusCode = 404;
+        log.error('User not found');
+        return res.send({ error: 'User not found' });
+    })
+});
+
+app.post('/signup', function(req, res) {
+    log.error(req.body.password);
+    var user = new UserModel({
+        username: req.body.username,
+        password: getHash(req.body.password),
+        email: req.body.email,
+        phone: req.body.phone,
+        'address.street': req.body.street,
+        'address.zip': req.body.zip,
+        'address.city': req.body.city,
+        'address.country': req.body.country
+    });
+
+    user.save(function (err) {
+        if (!err) {
+            return res.send({ status: 'OK', user: user });
+        } else {
+            console.log(err);
+            if(err.name === 'ValidationError') {
+                res.statusCode = 400;
+                res.send({ error: 'Validation error' });
+            } else {
+                res.statusCode = 500;
+                res.send({ error: 'Server error' });
+            }
+            log.error('Internal error(%d): %s',res.statusCode,err.message);
+        }
+    });
 });
 
 app.get('/wines', function(req, res) {
     return WineModel.find(function (err, articles) {
         if (!err) {
-            return res.status(200).send(JSON.stringify(articles));
+            return res.send(articles);
         } else {
             res.statusCode = 500;
-            log.error('Internal error(%d): %s',res.statusCode, err.message);
+            log.error('Internal error(%d): %s',res.statusCode,err.message);
             return res.send({ error: 'Server error' });
         }
     });
@@ -95,6 +139,10 @@ app.post('/users', function(req, res) {
 
 app.get('/users', function(req, res) {
     res.send('GET users');
+});
+
+app.get('/bucket', function(req, res) {
+    res.send('GET bucket');
 });
 
 app.post('/myorders', function(req, res) {

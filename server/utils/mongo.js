@@ -27,18 +27,22 @@ var Wine = new Schema({
         type: { type: String, required: true },
         desc: { type: String }
     },
-    images: { type: Images, required: true },
-    price: { type: Number, required: true}
+    images: { type: Images, required: true }
 });
 
-// validation
-Wine.path('name').validate(function (v) {
-    return v.length > 5 && v.length < 70;
+var User = new Schema({
+    username: { type: String, required: true },
+    password: { type: String, required: true },
+    email: { type: String, required: true },
+    phone: { type: String },
+    address: {
+        street: { type: String },
+        zip: { type: String },
+        city: { type: String },
+        country: { type: String }
+    }
 });
 
-var WineModel = mongoose.model('Wines', Wine);
-var ImageModel = mongoose.model('Images', Images);
-
-
-module.exports.WineModel = WineModel;
-module.exports.ImageModel = ImageModel;
+module.exports.WineModel = mongoose.model('Wines', Wine);
+module.exports.ImageModel = mongoose.model('Images', Images);
+module.exports.UserModel = mongoose.model('User', User);
