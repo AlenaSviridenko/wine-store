@@ -1,0 +1,190 @@
+var express = require('express');
+var path = require('path');
+var log = require('./utils/log')(module);
+var config = require('./config.json');
+
+var express = require('express');
+var favicon = require('serve-favicon');
+var logger = require('morgan');
+var methodOverride = require('method-override');
+var session = require('express-session');
+var bodyParser = require('body-parser');
+var app = express();
+
+var salt = '20sdkfjk23';
+var dbModels = require('./utils/mongo');
+
+var WineModel = dbModels.WineModel;
+var ImageModel = dbModels.ImageModel;
+
+
+app.set('port', config.port);
+app.set('views', __dirname + '/views');
+app.set('view engine', 'jade');
+app.use(logger('dev'));
+app.use(methodOverride());
+app.use(session({ secret: salt/*, store: new RedisStore*/, cookie: { maxAge: 3600000 * 24 * 30 } }));
+
+// parse application/json
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
+app.use(express.static('../client'));
+
+/*app.get('*', function (req, res) {
+
+    var init = "$(document).ready(function() { App.initialize(); });";
+    if (typeof req.session.user !== 'undefined') {
+        init = "$(document).ready(function() { App.user = " + JSON.stringify(req.session.user) + "; App.initialize(); });";
+    }
+
+    fs.readFile('../client/index.html', 'utf8', function(error, content) {
+        if (error) console.log(error);
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.end(content, 'utf-8');
+    });
+});*/
+
+app.listen(config.port, function () {
+    console.log('Running on port ' + config.port)
+});
+
+app.get('/wines', function(req, res) {
+    return WineModel.find(function (err, articles) {
+        if (!err) {
+            return res.status(200).send(JSON.stringify(articles));
+        } else {
+            res.statusCode = 500;
+            log.error('Internal error(%d): %s',res.statusCode, err.message);
+            return res.send({ error: 'Server error' });
+        }
+    });
+});
+
+app.post('/wines', function(req, res) {
+    var wine = new WineModel({
+        name: req.body.name,
+        'description.country': req.body['description.country'],
+        'description.year': req.body['description.year'],
+        'description.type': req.body['description.type'],
+        'description.desc': req.body['description.desc'],
+        images: new ImageModel({imgurl: req.body.images})
+    });
+
+    wine.save(function (err) {
+        if (!err) {
+            log.info('Wine saved!');
+            return res.send({ status: 'OK', wine: wine });
+        } else {
+            console.log(err);
+            if(err.name === 'ValidationError') {
+                res.statusCode = 400;
+                res.send({ error: 'Validation error' });
+            } else {
+                res.statusCode = 500;
+                res.send({ error: 'Server error' });
+            }
+            log.error('Internal error(%d): %s',res.statusCode,err.message);
+        }
+    });
+});
+
+app.post('/users', function(req, res) {
+    res.send('POST users');
+});
+
+app.get('/users', function(req, res) {
+    res.send('GET users');
+});
+
+app.post('/myorders', function(req, res) {
+    res.send('POST ORDER');
+});
+
+app.get('/myorders', function(req, res) {
+    res.send('GET orders');
+});
+
+app.get('/wines/:id', function(req, res) {
+    return WineModel.findById(req.params.id, function (err, wine) {
+        if(!wine) {
+            res.statusCode = 404;
+            return res.send({ error: 'Not found' });
+        }
+        if (!err) {
+            return res.send({ status: 'OK', wine: wine });
+        } else {
+            res.statusCode = 500;
+            log.error('Internal error(%d): %s', res.statusCode, err.message);
+            return res.send({ error: 'Server error' });
+        }
+    });
+});
+
+app.put('/wines/:id', function (req, res){
+    return WineModel.findById(req.params.id, function (err, wine) {
+        if(!wine) {
+            res.statusCode = 404;
+            return res.send({ error: 'Not found' });
+        }
+
+        wine.name = req.body.name;
+        wine.description.country = req.body.description.country;
+        wine.description.year = req.body.description.year;
+        wine.description.type = req.body.description.type;
+        wine.description.desc = req.body.description.desc;
+        wine.images = new ImageModel({imgurl: req.body.images});
+        return wine.save(function (err) {
+            if (!err) {
+                log.info("article updated");
+                return res.send({ status: 'OK', wine: wine });
+            } else {
+                if(err.name === 'ValidationError') {
+                    res.statusCode = 400;
+                    res.send({ error: 'Validation error' });
+                } else {
+                    res.statusCode = 500;
+                    res.send({ error: 'Server error' });
+                }
+                log.error('Internal error(%d): %s',res.statusCode,err.message);
+            }
+        });
+    });
+});
+
+app.delete('/wines/:id', function (req, res){
+    return WineModel.findById(req.params.id, function (err, wine) {
+        if(!wine) {
+            res.statusCode = 404;
+            return res.send({ error: 'Not found' });
+        }
+        return wine.remove(function (err) {
+            if (!err) {
+                log.info("article removed");
+                return res.send({ status: 'OK' });
+            } else {
+                res.statusCode = 500;
+                log.error('Internal error(%d): %s', res.statusCode, err.message);
+                return res.send({ error: 'Server error' });
+            }
+        });
+    });
+});
+
+app.use(function(req, res, next){
+    res.status(404);
+    log.debug('Not found URL: %s',req.url);
+    res.send({ error: 'Not found' });
+});
+
+app.use(function(err, req, res, next) {
+    console.log(err);
+    res.status(err.status || 500);
+    log.error('Internal error(%d): %s',res.statusCode,err.message);
+    res.send({ error: err.message });
+});
+
+app.get('/ErrorExample', function(req, res, next){
+    next(new Error('Random error!'));
+});
+
