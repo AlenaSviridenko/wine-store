@@ -139,7 +139,24 @@ app.post('/users', function(req, res) {
 });
 
 app.get('/users', function(req, res) {
-    res.send('GET users');
+    console.log(req.query.username);
+    var query = req.query;
+
+    if (query && query.username) {
+        return UserModel.findOne({username: query.username}, function (err, user) {
+            if (!err && !user) {
+                res.statusCode = 200;
+                return res.send({});
+            } else if (!err && user) {
+                res.statusCode = 403;
+                return res.send(user);
+            } else {
+                res.statusCode = 500;
+                log.error('Internal error(%d): %s',res.statusCode,err.message);
+                return res.send({ error: 'Server error' });
+            }
+        });
+    }
 });
 
 app.get('/bucket', function(req, res) {

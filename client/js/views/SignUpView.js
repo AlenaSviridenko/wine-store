@@ -1,66 +1,72 @@
-App.Views.SignUpView = Backbone.View.extend({
-    events: {
-        "submit #frm-signup": "signup"
-    },
+// using template as a function to use two-way binding with epoxy
+var template = function() {
+    return function() {
+        return $('#modal').html($('#signup-template').html());
+    }
+};
 
+App.Views.SignUpView = Backbone.Epoxy.View.extend({
+
+    el: template(),
+
+    events: {
+        "submit #frm-signup": "signup",
+        "blur #username": "checkUsername"
+    },
 
     initialize: function() {
         Backbone.Validation.bind(this);
-        this.template = _.template($('#signup-template').html());
-    },
-
-    render: function() {
-        this.stickit();
-        $(this.$el).append(this.template());
-        return this;
     },
 
     signup: function(e) {
         e.preventDefault();
 
-        // See: http://thedersen.com/projects/backbone-validation/#methods/isvalid
-        if (!this.model.isValid(true)) {
-            // this.model.save();
-            alert('!');
+        if (this.model.isValid(true)) {
+            var data = {
+                username: this.model.get('username'),
+                firstName: this.model.get('firstName'),
+                lastName: this.model.get('lastName'),
+                email: this.model.get('email'),
+                password: this.model.get('password')
+            };
+
+            $.ajax({
+                type: 'POST',
+                url: '/signup',
+                dataType: 'json',
+                data: data,
+                success: function(data) {
+                    App.user = data;
+                    $('#modal').modal('toggle');
+                },
+                error: function() {
+                    $('#login-error').html('That username &amp; password was not found.').addClass('alert-message').addClass('error');
+                }
+            });
         }
     },
 
+    checkUsername: function (e) {
+        var value = $(e.currentTarget).val();
+        var query = {
+            username: value
+        };
+
+        var url = '/users?q=' + JSON.stringify(query);
+        var self = this;
+
+        $.get(url)
+            .then(function() {}, function () {
+                Backbone.Validation.callbacks.invalid(self, 'username', 'username already exists', 'name');
+            });
+    },
+
     bindings: {
-        '#username': {
-            observe: 'username',
-            setOptions: {
-                validate: true
-            }
-        },
-        '#firstName': {
-            observe: 'firstName',
-            setOptions: {
-                validate: true
-            }
-        },
-        '#lastName': {
-            observe: 'lastName',
-            setOptions: {
-                validate: true
-            }
-        },
-        '#email': {
-            observe: 'email',
-            setOptions: {
-                validate: true
-            }
-        },
-        '#password': {
-            observe: 'password',
-            setOptions: {
-                validate: true
-            }
-        },
-        '#confirmPassword': {
-            observe: 'conformPassword',
-            setOptions: {
-                validate: true
-            }
-        }
+        'input#username': 'value:username',
+        'input#firstName': 'value:firstName',
+        'input#lastName': 'value:lastName',
+        'input#email': 'value:email',
+        'input#password': 'value:password',
+        'input#confirmPassword': 'value:confirmPassword'
     }
 });

@@ -83,13 +83,12 @@ App.Views.AppView = Backbone.View.extend({
     toggleSignup: function(e) {
         e.preventDefault();
 
-        var signUp = new App.Views.SignUpView({ el: '#modal', model: new App.Models.User});
+        var signUp = new App.Views.SignUpView({model: new App.Models.User()});
         signUp.render();
     },
 
     login: function(e) {
         e.preventDefault();
-
 
         var username = $('#username').val();
         var password = $('#password').val();
