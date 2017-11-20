@@ -26,8 +26,8 @@ WinificationRouter = Backbone.Router.extend({
 
         //The "app view" is the layout, containing the header and footer, for the app
         //The body area is rendered by other views
-        this.view = this.views.app;
-        this.view.render();
+        //this.view = this.views.app;
+        this.views.app.render();
     },
 
     index: function() {
@@ -44,7 +44,7 @@ WinificationRouter = Backbone.Router.extend({
     },
 
     bucket: function() {
-        //App.globals.bucket.render();
+        App.globals.bucket.render();
     },
 
     tag: function(tag) {

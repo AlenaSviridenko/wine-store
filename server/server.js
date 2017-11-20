@@ -46,8 +46,9 @@ app.listen(config.port, function () {
 });
 
 app.post('/login', function(req, res) {
+    console.log(req.body)
     return UserModel.findOne({username: req.body.username}, function(err, user) {
-        if (!err) {
+        if (!err && user) {
             log.error(req.body.password);
             log.error(user.toJSON());
             if (verifyPassword(req.body.password, user.password)) {

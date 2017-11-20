@@ -20,6 +20,7 @@
     "multer": "0.1.*",
     "requirejs": "^2.3.5",
     "serve-favicon": "2",
-    "socket.io": "1.1.*"
+    "socket.io": "1.1.*",
+    "winston": "^2.4.0"
   }
 }

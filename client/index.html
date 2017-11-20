@@ -5,10 +5,13 @@
     <title>Winification</title>
     <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.2.4.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/jquery.validation/1.15.1/jquery.validate.min.js"></script>
     <script src="http://ajax.cdnjs.com/ajax/libs/json2/20110223/json2.js"></script>
     <script src="http://underscorejs.org/underscore-min.js"></script>
     <script src="http://builds.handlebarsjs.com.s3.amazonaws.com/handlebars.min-v4.0.11.js"></script>
     <script src="http://backbonejs.org/backbone-min.js"></script>
+    <script src="https://cdn.rawgit.com/thedersen/backbone.validation/master/dist/backbone-validation.js"></script>
+    <script src="https://cdn.rawgit.com/NYTimes/backbone.stickit/master/backbone.stickit.js"></script>
 
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
@@ -19,6 +22,7 @@
 
 
     <script src="js/models/wines.js"></script>
+    <script src="js/models/user.js"></script>
     <script src="js/models/wines-collection.js"></script>
     <script src="js/models/bucket-collection.js"></script>
 
@@ -26,33 +30,12 @@
     <script src="js/views/ItemView.js"></script>
     <script src="js/views/PublicView.js"></script>
     <script src="js/views/BucketView.js"></script>
+    <script src="js/views/SignUpView.js"></script>
 
     <script src="js/routes/winification-router.js"></script>
-    <!--<script src="/js/backbone-min.js"></script>
-    <script src="/js/jquery.masonry.min.js"></script>
-    <script src="/js/jquery.tagsinput.min.js"></script>
-
-    <script src="/js/models/Bookmark.js"></script>
-    <script src="/js/models/BookmarksCollection.js"></script>
-    <script src="/js/models/Tag.js"></script>
-    <script src="/js/models/TagsCollection.js"></script>
-    <script src="/js/views/PublicView.js"></script>
-    <script src="/js/views/AccountView.js"></script>
-    <script src="/js/views/EditView.js"></script>
-    <script src="/js/views/BookmarkView.js"></script>
-    <script src="/js/views/BookmarksView.js"></script>
-    <script src="/js/views/TagView.js"></script>
-    <script src="/js/views/TagsView.js"></script>
-    -->
-
-    <script type="text/javascript">
-        $(document).ready(function() {
-            App.initialize();
-        });
-    </script>
-
 
     <script id="header-template" type="text/template">
+        <div id="modal"></div>
         <div id="redbar">
             <div class="wrap">
                 <ul class="logged-in">
@@ -66,13 +49,13 @@
                 </ul>
 
                 <ul class="public">
-                    <li><a href="/login" id="btn-login" data-toggle="modal" data-target="#login1">Sign in</a></li>
+                    <li><a id="login">Sign in</a></li>
                     <li>or</li>
-                    <li><a href="/signup" id="btn-signup"  data-toggle="modal" data-target="#signup1">Sign up</a></li>
+                    <li><a id="signup">Sign up</a></li>
                 </ul>
 
                 <ul>
-                    <li><span class="badge"><%= itemsLength %></span><a href="/mybucket" id="btn-mybucket">My bucket</a></li>
+                    <li><span class="badge"><%= itemsLength %></span><a href="/mybucket" id="mybucket">My bucket</a></li>
                 </ul>
 
                 <ul class="logo">
@@ -95,166 +78,22 @@
                 <span><%- model.description.desc  %></span>
                 <span>$ <%- model.price %></span>
             </td>
-            <td><button class="addToBucket" id="<%- model.name %>">Add to cart</button></td>
+            <td>
+                <div class="input-group">
+                    <span class="input-group-btn">
+                        <button type="button" class="quantity-left-minus btn btn-danger btn-number"  data-type="minus" data-field="">-</button>
+                    </span>
+                    <input type="text" name="quantity" class="quantity-number form-control input-number" value="1" min="1" max="100">
+                    <span class="input-group-btn">
+                        <button type="button" class="quantity-right-plus btn btn-success btn-number" data-type="plus" data-field="">+</button>
+                    </span>
+                </div>
+                <button class="addToBucket" id="<%- model.name %>">Add to cart</button>
+            </td>
         </tr>
     </script>
 
-    <script id="public-template" type="text/template">
-        <table class="catalog">
-        </table>
-    </script>
-
-    <script id="bucket-template" type="text/template">
-        <table class="catalog">
-            <% _.each(collection, function(element) { %>
-                <tr style="max-width: 210px;">
-                    <td>
-                       <span><%= element.name + ', ' + element.type %></span>
-                    </td>
-                    <td>
-                       <span><%= element.quantity %></span>
-                    </td>
-                    <td>
-                       <span><%= element.price %></span>
-                    </td>
-                </tr>
-            <% }); %>
-            <tr>
-                <td colspan="2">Total Sum:</td>
-                <td><%= total %></td>
-            </tr>
-        </table>
-    </script>
-
-    <script id="footer-template" type="text/template">
-        <div class="wrap">
-            <div class="inner">
-                Copyright &copy; 2012 <a href="http://www.awio.com">Awio Web Services LLC</a>. All rights reserved.
-            </div>
-        </div>
-    </script>
-
-    <script id="account-template" type="text/template">
-        <div class="box">
-            <h2>Account</h2>
-            <div class="wrap">
-                <div class="inner">
-                    <p>Change your account information</p>
-                    <form id="frm-account">
-                        <fieldset>
-                            E-mail
-                            <br />
-                            <input type="text" name="email" value="{{email}}" class="span4" />
-                            <br /><br /><br />
-                            Username
-                            <br />
-                            <input type="text" name="username" value="{{username}}" class="span4" />
-                            <br /><br /><br />
-                            Password
-                            <br />
-                            <input type="password" name="password" value="{{password}}" class="span4" />
-                            <br /><br /><br />
-                            <input type="submit" name="submit" value="Save Changes" class="btn success" />
-                        </fieldset>
-                    </form>
-                </div>
-            </div>
-        </div>
-        <div class="box">
-            <h2>Import</h2>
-            <div class="wrap">
-                <div class="inner">
-                    <p>Import bookmarks from an HTML file exported by your browser or Delicious</p>
-                    <form id="frm-import" enctype="multipart/form-data">
-                        <fieldset>
-                            Choose File
-                            <br /><br />
-                            <input type="file" name="file" />
-                        </fieldset>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </script>
-
-    <script id="bookmark-template" type="text/template">
-        <div class="thumb"><a href="{{url}}"><img src="http://173.255.234.43:8080/thumb?url={{thumburl}}" style="width: 228px; height: 160px" /></a></div>
-        <div class="title"><a href="{{url}}">{{title}}</a></div>
-        <p class="description">{{description}}</p>
-        <ul class="tags">
-            {{#each tags}}
-            <li class="tag">{{this}}</li>
-            {{/each}}
-        </ul>
-        <div class="meta">
-            <span class="editdelete"><a href="#" class="edit">edit</a> &middot; <a href="#" class="delete">delete</a></span>
-            <span>{{date}}</span>
-        </div>
-    </script>
-
-    <script id="tag-template" type="text/template">
-        <a href="/tag/{{tag}}">{{tag}}</a> x {{count}}
-    </script>
-
-    <script id="edit-template" type="text/template">
-        <div class="modal">
-            <div class="modal-header">
-                <a href="#" class="close">&times;</a>
-                <h3>Edit bookmark</h3>
-            </div>
-            <div class="modal-body">
-                <form>
-                    <fieldset>
-                        <div class="clearfix">
-                            <label for="url">URL</label>
-                            <div class="input">
-                                <input name="url" type="text" value="{{url}}" class="span6" />
-                            </div>
-                        </div><!-- /clearfix -->
-
-                        <div class="clearfix">
-                            <label for="title">Title</label>
-                            <div class="input">
-                                <input name="title" type="text" value="{{title}}" class="span6" />
-                            </div>
-                        </div><!-- /clearfix -->
-
-                        <div class="clearfix">
-                            <label for="description">Description</label>
-                            <div class="input">
-                                <input name="description" type="text" value="{{description}}" class="span6" />
-                            </div>
-                        </div><!-- /clearfix -->
-
-                        <div class="clearfix">
-                            <label for="tags">Tags</label>
-                            <div class="input">
-                                <input name="tags" type="text" value="{{tags}}" class="span6" />
-                            </div>
-                        </div><!-- /clearfix -->
-
-                    </fieldset>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="reset" class="btn cancel">Cancel</button> <button type="submit" class="btn primary save">Save Changes</button>
-            </div>
-        </div>
-    </script>
-    <script src="js/jquery-3.2.1.min.js"></script>
-
-</head>
-<body>
-
-<div id="header">
-</div>
-
-<div id="app"></div>
-
-<div id="footer"></div>
-
-<div id="login1" class="modal-fade" role="dialog">
-    <div class="modal-dialog">
+    <script id="login-template" type="text/template">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -264,11 +103,11 @@
                     <div class="modal-body">
                         <div style="float: left; margin-right: 10px">
                             Username<br />
-                            <input type="text" name="username" style="width: 130px" />
+                            <input type="text" id="username" name="username" style="width: 130px" />
                         </div>
                         <div style="float: left; margin-right: 10px">
                             Password<br />
-                            <input type="password" name="password" style="width: 130px" />
+                            <input type="password" id="password" name="password" style="width: 130px" />
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -280,11 +119,9 @@
                 </fieldset>
             </form>
         </div>
-    </div>
-</div>
+    </script>
 
-<div id="signup1">
-    <div class="modal-dialog">
+    <script id="signup-template" type="text/template">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -292,21 +129,35 @@
             <form id="frm-signup">
                 <fieldset>
                     <div class="modal-body">
-                        <div style="float: left; margin-right: 10px">
-                            Email<br />
-                            <input type="text" name="Email" style="width: 130px" />
+                        <div class="form-group">
+                            <label for="firstName">First Name</label>
+                            <input type="text" name="firstName" id="firstName" style="width: 130px"/>
+                            <span class="help-block hidden"></span>
                         </div>
-                        <div style="float: left; margin-right: 10px">
-                            Username<br />
-                            <input type="text" name="username" style="width: 130px" />
+                        <div class="form-group">
+                            <label for="lastName">Last Name</label>
+                            <input type="text" name="lastName" id="lastName" style="width: 130px"/>
+                            <span class="help-block hidden"></span>
                         </div>
-                        <div style="float: left; margin-right: 10px">
-                            Password<br />
-                            <input type="password" name="password" style="width: 130px" />
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" name="email" id="email" style="width: 130px" placeholder="email@example.com"/>
+                            <span class="help-block hidden"></span>
                         </div>
-                        <div style="float: left; margin-right: 10px">
-                            Confirm password<br />
-                            <input type="password" name="confirmPassword" style="width: 130px" />
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" name="username" id="username" style="width: 130px" />
+                            <span class="help-block hidden"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" name="password" id="password" style="width: 130px" />
+                            <span class="help-block hidden"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmPassword">Confirm password</label>
+                            <input type="password" name="confirmPassword" id="confirmPassword" style="width: 130px" />
+                            <span class="help-block hidden"></span>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -318,9 +169,67 @@
                 </fieldset>
             </form>
         </div>
-    </div>
+    </script>
+
+    <script id="public-template" type="text/template">
+        <table class="catalog">
+        </table>
+    </script>
+
+    <script id="bucket-template" type="text/template">
+        <table class="catalog">
+            <tbody>
+            <tr>
+                <th>Name</th>
+                <th>Quantity</th>
+                <th>Price per item</th>
+            </tr>
+            <% _.each(collection, function(element) { %>
+            <tr>
+                <td>
+                    <span><%= element.name + ', ' + element.description.type %></span>
+                </td>
+                <td>
+                    <span><%= element.quantity %></span>
+                </td>
+                <td>
+                    <span><%= element.price %></span>
+                </td>
+            </tr>
+            <% }); %>
+            <tr>
+                <td colspan="2">Total Sum:</td>
+                <td><%= total %></td>
+            </tr>
+            </tbody>
+        </table>
+        <input type="button" id="sendOrder" value="Submit order"/>
+    </script>
+
+    <script id="footer-template" type="text/template">
+        <div class="wrap">
+            <div class="inner">
+                Copyright &copy; 2012 <a href="http://www.awio.com">Awio Web Services LLC</a>. All rights reserved.
+            </div>
+        </div>
+    </script>
+
+
+    <script type="text/javascript">
+        $(function() {
+            App.initialize();
+        });
+    </script>
+
+</head>
+<body>
+
+<div id="header">
 </div>
 
+<div id="app"></div>
+
+<div id="footer"></div>
 
 </body>
 

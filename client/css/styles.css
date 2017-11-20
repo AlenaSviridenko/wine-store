@@ -211,61 +211,6 @@ body {
     text-shadow: rgba(0, 0, 0, 0.246094) 0px -1px 0px;
 }*/
 
-#login, #signup {
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 30;
-    padding-top: 8px;
-    background: transparent url(/images/modalarrow.png) no-repeat 350px 0;
-    display: none;
-    text-align: left;
-}
-
-#signup {
-    background: transparent url(/images/modalarrow.png) no-repeat 180px 0;
-}
-
-#login .inner {
-    width: 370px;
-}
-
-#signup .inner {
-    width: 200px;
-}
-
-#login .wrap, #signup .wrap, .box .wrap {
-    background: #e1e1e1;
-    border: 1px solid #ccc;
-    padding: 6px;
-    -webkit-border-radius: 5px;
-    -moz-border-radius: 5px;
-    border-radius: 5px;
-    -webkit-box-shadow:0 0 5px #aaa;
-    -moz-box-shadow:0 0 5px #aaa;
-    box-shadow:0 0 5px #aaa;
-}
-
-#login .inner, #signup .inner, .box .inner {
-    background: #fff;
-    padding: 5px 15px;
-    -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
-    border-radius: 4px;
-    border:1px solid #ccc;
-    text-transform: uppercase;
-    font-size: 8pt;
-}
-
-.inner input[type=text], .inner input[type=password], .inner input[type=submit] {
-    margin-top: 10px;
-    text-transform: none;
-}
-
-.inner input[type=submit] {
-    font-size: 9pt;
-}
-
 .box .wrap {
     width: 420px;
 }
@@ -325,7 +270,7 @@ body {
 .modal-backdrop {
     z-index: 1 !important;
 }
-.modal-dialog {
+.modal-content {
     top: 50px;
     z-index: 20 !important;
 }
