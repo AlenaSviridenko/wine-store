@@ -63,8 +63,8 @@ WinificationRouter = Backbone.Router.extend({
     },
 
     account: function() {
-        this.setBody(this.views.account, true);
-        this.view.body.render();
+        this.views.account = new App.Views.AccountView({model: new App.Models.User()});
+        this.views.account.render();
     },
 
     bookmarklet: function(params) {

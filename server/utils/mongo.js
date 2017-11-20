@@ -35,6 +35,8 @@ var User = new Schema({
     password: { type: String, required: true },
     email: { type: String, required: true },
     phone: { type: String },
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
     address: {
         street: { type: String },
         zip: { type: String },

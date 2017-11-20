@@ -5,6 +5,7 @@ App.Views.AppView = Backbone.View.extend({
     events: {
         "click  #btn-home": "home",
         "click  #btn-mybucket": "mybucket",
+        "click  #btn-account": "account",
         "click #login": "toggleLogin",
         "click #signup": "toggleSignup",
         "submit #frm-login": "login"

@@ -1,7 +1,7 @@
 // using template as a function to use two-way binding with epoxy
 var template = function() {
     return function() {
-        return $('#modal').html($('#signup-template').html());
+        return $('#modal').html($('#signup-template').html()).modal('toggle');
     }
 };
 
@@ -36,10 +36,10 @@ App.Views.SignUpView = Backbone.Epoxy.View.extend({
                 dataType: 'json',
                 data: data,
                 success: function(data) {
-                    App.user = data;
+                    App.user = data.user;
                     $('#modal').modal('toggle');
                 },
-                error: function() {
+                error: function(err) {
                     $('#login-error').html('That username &amp; password was not found.').addClass('alert-message').addClass('error');
                 }
             });
@@ -48,11 +48,7 @@ App.Views.SignUpView = Backbone.Epoxy.View.extend({
 
     checkUsername: function (e) {
         var value = $(e.currentTarget).val();
-        var query = {
-            username: value
-        };
-
-        var url = '/users?q=' + JSON.stringify(query);
+        var url = '/users?username=' + value;
         var self = this;
 
         $.get(url)

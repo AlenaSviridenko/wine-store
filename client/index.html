@@ -32,6 +32,7 @@
     <script src="js/views/PublicView.js"></script>
     <script src="js/views/BucketView.js"></script>
     <script src="js/views/SignUpView.js"></script>
+    <script src="js/views/AccountView.js"></script>
 
     <script src="js/routes/winification-router.js"></script>
 
@@ -205,6 +206,50 @@
             </tbody>
         </table>
         <input type="button" id="sendOrder" value="Submit order"/>
+    </script>
+
+    <script id="account-template" type="text/template">
+        <div class="catalog" style="padding-left:20px;">
+            <div class="form-group">
+                <label for="firstName">First name</label>
+                <span name="firstName" class="display-value"> <%= model.firstName %></span>
+                <input type="text" name="firstName" value="<%= model.firstName %>" class="edit" hidden/>
+            </div>
+            <div class="form-group">
+                <label for="lastName">Last name</label>
+                <span name="lastName" class="display-value"> <%= model.lastName %></span>
+                <input type="text" name="lastName" class="edit" value="<%= model.lastName %>" hidden/>
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone</label>
+                <span name="phone" class="display-value"> <%= model.phone || 'Not specified' %></span>
+                <input type="text" name="phone" class="edit" value="<%= model.phone %>" hidden/>
+            </div>
+            <div class="form-group">
+                <label for="country">Country</label>
+                <span name="country" class="display-value"> <%= model.address.country || 'Not specified' %></span>
+                <input type="text" name="country" value="<%= model.address.country %>" class="edit" hidden/>
+            </div>
+            <div class="form-group">
+                <label for="city">City</label>
+                <span name="city" class="display-value"> <%= model.address.city || 'Not specified' %></span>
+                <input type="text" name="city" value="<%= model.address.city %>" class="edit" hidden/>
+            </div>
+            <div class="form-group">
+                <label for="street">Street</label>
+                <span name="street" class="display-value"> <%= model.address.street || 'Not specified' %></span>
+                <input type="text" name="street" value="<%= model.address.street %>" class="edit" hidden/>
+            </div>
+            <div class="form-group">
+                <label for="zip">Zip</label>
+                <span name="zip" class="display-value"> <%= model.address.zip || 'Not specified' %></span>
+                <input type="text" name="zip" value="<%= model.address.zip %>" class="edit" hidden/>
+            </div>
+            <div class="form-group">
+                <input type="button" name="edit" value="Edit information"/>
+                <input type="button" name="save" class="edit" value="Save" hidden/>
+            </div>
+        </div>
     </script>
 
     <script id="footer-template" type="text/template">

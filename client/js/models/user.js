@@ -44,6 +44,13 @@ App.Models.User = Backbone.Model.extend({
         email: '',
         password: '',
         confirmPassword: '',
-        username: ''
+        username: '',
+        phone:'',
+        address: {
+            city:'',
+            country:'',
+            zip:'',
+            street:''
+        }
     }
 });

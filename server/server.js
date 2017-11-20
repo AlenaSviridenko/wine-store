@@ -27,7 +27,6 @@ var verifyPassword = function(password, hash) {
  return bcrypt.compareSync(password, hash);
 };
 
-
 app.set('port', config.port);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
@@ -46,7 +45,6 @@ app.listen(config.port, function () {
 });
 
 app.post('/login', function(req, res) {
-    console.log(req.body)
     return UserModel.findOne({username: req.body.username}, function(err, user) {
         if (!err && user) {
             log.error(req.body.password);
@@ -70,6 +68,8 @@ app.post('/signup', function(req, res) {
         username: req.body.username,
         password: getHash(req.body.password),
         email: req.body.email,
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
         phone: req.body.phone,
         'address.street': req.body.street,
         'address.zip': req.body.zip,
