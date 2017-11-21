@@ -12,7 +12,7 @@ WinificationRouter = Backbone.Router.extend({
     views: {},
 
     initialize: function() {
-        _.bindAll(this, 'index', 'bucket', 'tag', 'tags', 'search', 'bookmarklet', 'setBody');
+        _.bindAll(this, 'index', 'bucket', 'tag', 'tags', 'search', 'setBody');
 
         this.views.app = new App.Views.AppView();
         this.views.public = new App.Views.PublicView();
@@ -63,20 +63,8 @@ WinificationRouter = Backbone.Router.extend({
     },
 
     account: function() {
-        this.views.account = new App.Views.AccountView({model: new App.Models.User()});
+        this.views.account = new App.Views.AccountView({model: new App.Models.User(App.user)});
         this.views.account.render();
-    },
-
-    bookmarklet: function(params) {
-        this.setBody(this.views.bookmarks, true);
-        this.view.body.fetch();
-
-        var regex = /\?url=(.*?)&title=(.*)/gi
-        matches = regex.exec(params);
-        var url = matches[1];
-        var title = matches[2];
-        var bookmark = { url: url, title: title };
-        new EditView({ model: new Bookmark(bookmark) }).render();
     },
 
     setBody: function(view, auth) {

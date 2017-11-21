@@ -1,6 +1,7 @@
 App.Models.User = Backbone.Model.extend({
-    url: '/users',
-   validation: {
+    urlRoot: '/users',
+    idAttribute: '_id',
+    validation: {
        firstName: {
            required: true,
            msg: 'Please enter your first name'
@@ -38,9 +39,14 @@ App.Models.User = Backbone.Model.extend({
            required: true,
            msg: 'Please enter your username'
        }
-   },
+    },
+
+    parse: function(result) {
+        App.user = result.user;
+        Cookies.set('userData', result.user);
+    },
+
     defaults: {
-        _id: '',
         firstName: '',
         lastName: '',
         email: '',

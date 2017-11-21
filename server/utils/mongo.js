@@ -39,12 +39,10 @@ var User = new Schema({
     phone: { type: String },
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
-    address: {
-        street: { type: String },
-        zip: { type: String },
-        city: { type: String },
-        country: { type: String }
-    }
+    street: { type: String },
+    zip: { type: String },
+    city: { type: String },
+    country: { type: String }
 });
 
 var Order = new Schema({

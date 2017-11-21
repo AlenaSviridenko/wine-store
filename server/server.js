@@ -44,9 +44,8 @@ app.use(session({
 }));
 
 // parse application/json
-app.use(bodyParser.urlencoded({
-    extended: true
-}));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('../client'));
 
 app.listen(config.port, function () {
@@ -137,30 +136,33 @@ app.post('/users', function(req, res) {
     });
 });
 
-app.post('/users/:id', function(req, res) {
-    var user = new UserModel({
-        firstName: req.body.firstName,
-        lastName: req.body.lastName,
-        phone: req.body.phone || '',
-        'address.street': req.body.street || '',
-        'address.zip': req.body.zip || '',
-        'address.city': req.body.city || '',
-        'address.country': req.body.country || ''
-    });
+app.put('/users/:id', function(req, res) {
+    UserModel.findById(req.params.id, function(err, user) {
+        if (!user) {
+            res.statusCode = 404;
+            return res.send({error: 'Not updated, user not found'})
+        }
 
-    user.save(function (err) {
-        if (!err) {
-            return res.send({ status: 'OK', user: user });
-        } else {
-            console.log(err);
-            if(err.name === 'ValidationError') {
-                res.statusCode = 400;
-                res.send({ error: 'Validation error' });
-            } else {
-                res.statusCode = 500;
-                res.send({ error: 'Server error' });
-            }
-            log.error('Internal error(%d): %s',res.statusCode,err.message);
+        if (user) {
+            user.address = user.address || {};
+
+            user.firstName = req.body.firstName;
+            user.lastName = req.body.lastName;
+            user.phone = req.body.phone || '';
+            user.street = req.body.street || '';
+            user.zip = req.body.zip || '';
+            user.city = req.body.city || '';
+            user.country = req.body.country || '';
+
+            user.save(user, function(err) {
+                if (err) {
+                    res.statusCode = 500;
+                    return res.send({error: 'Internal error while saving'})
+                }
+                res.statusCode = 200;
+                return res.send({status: 'OK', user: user});
+            })
+
         }
     });
 });

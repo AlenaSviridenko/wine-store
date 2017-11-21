@@ -30,7 +30,7 @@ App.Views.SignUpView = Backbone.Epoxy.View.extend({
                 password: this.model.get('password')
             };
 
-            $.post('users', { data: data }, function(data) {
+            $.post('/users', { data: data }, function(data) {
                 App.user = data.user;
                 $('#modal').modal('toggle');
             })

@@ -89,17 +89,13 @@ App.Views.AppView = Backbone.View.extend({
     login: function(e) {
         e.preventDefault();
 
-        var username = $('#username').val();
-        var password = $('#password').val();
+        var data = {
+            username: $('#username').val(),
+            password: $('#password').val()
+        };
         var self = this;
 
-        $.ajax({
-            type: 'POST',
-            url: '/login',
-            dataType: 'json',
-            data: { username: username, password: password },
-            success: function(data) {
-
+        $.post('/login', data,  function(data){
                 if(data && data.user && data.sid) {
                     self.toggleHeaders();
 
@@ -108,10 +104,9 @@ App.Views.AppView = Backbone.View.extend({
                 }
 
                 $('#modal').modal('toggle');
-            },
-            error: function() {
+            })
+            .fail( function() {
                 $('#login-error').html('That username &amp; password was not found.').addClass('alert-message').addClass('error');
-            }
         });
     },
 

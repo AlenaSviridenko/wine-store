@@ -1,8 +1,7 @@
 var template = function() {
     return function() {
         var template1 = _.template($('#account-template').html());
-        App.user.address = App.user.address || {};
-        this.model.attributes = _.extend({}, this.model.attributes, App.user);
+        this.model = new  App.Models.User(App.user);
         return $('#app').html(template1({model: this.model.toJSON()}));
     }
 };
@@ -17,6 +16,7 @@ App.Views.AccountView = Backbone.Epoxy.View.extend({
 
     initialize: function() {
         Backbone.Validation.bind(this);
+        this.listenTo(this.model, 'sync', this.render);
     },
 
     bindings: {
@@ -29,6 +29,8 @@ App.Views.AccountView = Backbone.Epoxy.View.extend({
         'input[name="phone"]': 'value:phone'
     },
 
+    render: template(),
+
     setEditView: function(e) {
         e.preventDefault();
 
@@ -39,8 +41,13 @@ App.Views.AccountView = Backbone.Epoxy.View.extend({
     },
 
     validateAndSave: function() {
+        var self = this;
         if (this.model.isValid(['firstName', 'lastName'])) {
-            this.model.save();
+            this.model.save(null, {success: function() {
+                $('span.display-value').toggle();
+                $('input[name="edit"]').toggle();
+                $('input.edit').toggle();
+            }});
         }
     }
 });
