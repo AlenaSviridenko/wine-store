@@ -19,6 +19,10 @@ App.Views.PublicView = Backbone.View.extend({
         );
     },
 
+    unrender: function() {
+        $(this.el).detach();
+    },
+
     render: function(collection) {
         if (collection) {
             this.$el.empty();

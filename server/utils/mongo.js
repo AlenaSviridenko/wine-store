@@ -21,13 +21,15 @@ var Images = new Schema({
 
 var Wine = new Schema({
     name: { type: String, required: true },
+    price: { type: Number, required: true },
     description: {
         country: { type: String, required: true },
         year: { type: Number, required: true },
         type: { type: String, required: true },
         desc: { type: String }
     },
-    images: { type: Images, required: true }
+    images: { type: Images, required: true },
+    availableQuantity: { type: Number, required: true }
 });
 
 var User = new Schema({
@@ -45,6 +47,18 @@ var User = new Schema({
     }
 });
 
+var Order = new Schema({
+    userId: { type: String, required: true },
+    items: [
+        {
+            itemId: { type: String, required: true },
+            quantity: { type: Number, required: true }
+        }
+    ],
+    totalSum: { type: Number, required: true }
+});
+
 module.exports.WineModel = mongoose.model('Wines', Wine);
 module.exports.ImageModel = mongoose.model('Images', Images);
 module.exports.UserModel = mongoose.model('User', User);
+module.exports.OrderModel = mongoose.model('Order', Order);

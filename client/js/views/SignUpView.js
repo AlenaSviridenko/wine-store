@@ -30,19 +30,13 @@ App.Views.SignUpView = Backbone.Epoxy.View.extend({
                 password: this.model.get('password')
             };
 
-            $.ajax({
-                type: 'POST',
-                url: '/signup',
-                dataType: 'json',
-                data: data,
-                success: function(data) {
-                    App.user = data.user;
-                    $('#modal').modal('toggle');
-                },
-                error: function(err) {
+            $.post('users', { data: data }, function(data) {
+                App.user = data.user;
+                $('#modal').modal('toggle');
+            })
+                .fail(function() {
                     $('#login-error').html('That username &amp; password was not found.').addClass('alert-message').addClass('error');
-                }
-            });
+                });
         }
     },
 

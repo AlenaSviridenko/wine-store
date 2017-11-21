@@ -1,4 +1,5 @@
 App.Models.Wine = Backbone.Model.extend({
+    url: '/wines',
     defaults: {
         name:'',
         description: {

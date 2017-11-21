@@ -6,12 +6,12 @@
     <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.2.4.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
     <script src="https://cdn.jsdelivr.net/jquery.validation/1.15.1/jquery.validate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
     <script src="http://ajax.cdnjs.com/ajax/libs/json2/20110223/json2.js"></script>
     <script src="http://underscorejs.org/underscore-min.js"></script>
     <script src="http://builds.handlebarsjs.com.s3.amazonaws.com/handlebars.min-v4.0.11.js"></script>
     <script src="http://backbonejs.org/backbone-min.js"></script>
     <script src="https://cdn.rawgit.com/thedersen/backbone.validation/master/dist/backbone-validation.js"></script>
-    <script src="https://cdn.rawgit.com/NYTimes/backbone.stickit/master/backbone.stickit.js"></script>
     <script src="https://cdn.rawgit.com/gmac/backbone.epoxy/master/backbone.epoxy.js"></script>
 
 
@@ -23,6 +23,7 @@
 
 
     <script src="js/models/wines.js"></script>
+    <script src="js/models/session.js"></script>
     <script src="js/models/user.js"></script>
     <script src="js/models/wines-collection.js"></script>
     <script src="js/models/bucket-collection.js"></script>
@@ -45,7 +46,7 @@
                     <li class="dropdown-head"><a href="/account" id="btn-account">My Account</a>
                         <div class="dropdown-content">
                             <a href="/myorders" id="btn-myorders">My orders</a>
-                            <a href="/logout" id="btn-logout">Sign out</a>
+                            <a id="btn-logout">Sign out</a>
                         </div>
                     </li>
                 </ul>
@@ -85,7 +86,7 @@
                     <span class="input-group-btn">
                         <button type="button" class="quantity-left-minus btn btn-danger btn-number"  data-type="minus" data-field="">-</button>
                     </span>
-                    <input type="text" name="quantity" class="quantity-number form-control input-number" value="1" min="1" max="100">
+                    <input type="text" name="quantity" class="quantity-number form-control input-number" value="1" min="1" max="<%= model.availableQuantity %>">
                     <span class="input-group-btn">
                         <button type="button" class="quantity-right-plus btn btn-success btn-number" data-type="plus" data-field="">+</button>
                     </span>
@@ -210,15 +211,18 @@
 
     <script id="account-template" type="text/template">
         <div class="catalog" style="padding-left:20px;">
+            <span name="id" hidden><%= model._id %></span>
             <div class="form-group">
                 <label for="firstName">First name</label>
                 <span name="firstName" class="display-value"> <%= model.firstName %></span>
                 <input type="text" name="firstName" value="<%= model.firstName %>" class="edit" hidden/>
+                <span class="help-block hidden"></span>
             </div>
             <div class="form-group">
                 <label for="lastName">Last name</label>
                 <span name="lastName" class="display-value"> <%= model.lastName %></span>
                 <input type="text" name="lastName" class="edit" value="<%= model.lastName %>" hidden/>
+                <span class="help-block hidden"></span>
             </div>
             <div class="form-group">
                 <label for="phone">Phone</label>
@@ -227,23 +231,23 @@
             </div>
             <div class="form-group">
                 <label for="country">Country</label>
-                <span name="country" class="display-value"> <%= model.address.country || 'Not specified' %></span>
-                <input type="text" name="country" value="<%= model.address.country %>" class="edit" hidden/>
+                <span name="country" class="display-value"> <%= model.country || 'Not specified' %></span>
+                <input type="text" name="country" value="<%= model.country %>" class="edit" hidden/>
             </div>
             <div class="form-group">
                 <label for="city">City</label>
-                <span name="city" class="display-value"> <%= model.address.city || 'Not specified' %></span>
-                <input type="text" name="city" value="<%= model.address.city %>" class="edit" hidden/>
+                <span name="city" class="display-value"> <%= model.city || 'Not specified' %></span>
+                <input type="text" name="city" value="<%= model.city %>" class="edit" hidden/>
             </div>
             <div class="form-group">
                 <label for="street">Street</label>
-                <span name="street" class="display-value"> <%= model.address.street || 'Not specified' %></span>
-                <input type="text" name="street" value="<%= model.address.street %>" class="edit" hidden/>
+                <span name="street" class="display-value"> <%= model.street || 'Not specified' %></span>
+                <input type="text" name="street" value="<%= model.street %>" class="edit" hidden/>
             </div>
             <div class="form-group">
                 <label for="zip">Zip</label>
-                <span name="zip" class="display-value"> <%= model.address.zip || 'Not specified' %></span>
-                <input type="text" name="zip" value="<%= model.address.zip %>" class="edit" hidden/>
+                <span name="zip" class="display-value"> <%= model.zip || 'Not specified' %></span>
+                <input type="text" name="zip" value="<%= model.zip %>" class="edit" hidden/>
             </div>
             <div class="form-group">
                 <input type="button" name="edit" value="Edit information"/>

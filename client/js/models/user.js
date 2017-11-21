@@ -1,4 +1,5 @@
 App.Models.User = Backbone.Model.extend({
+    url: '/users',
    validation: {
        firstName: {
            required: true,
@@ -39,18 +40,17 @@ App.Models.User = Backbone.Model.extend({
        }
    },
     defaults: {
+        _id: '',
         firstName: '',
         lastName: '',
         email: '',
         password: '',
         confirmPassword: '',
         username: '',
-        phone:'',
-        address: {
-            city:'',
-            country:'',
-            zip:'',
-            street:''
-        }
+        phone: '',
+        city: '',
+        country: '',
+        street: '',
+        zip: ''
     }
 });

@@ -48,11 +48,18 @@ App.Views.BucketView = Backbone.View.extend({
         }
 
         if (this.addressFilledCorrectly()) {
-
+            var collectionArray = this.collection.toJSON();
+            var itemsAray = collectionArray.reduce(function(item) {
+                return {
+                    itemId: item._id,
+                    quantity: item.quantity
+                }
+            }, []);
+            console.log('');
         }
     },
 
     addressFilledCorrectly: function () {
-        return App.user && App.user.address && App.user.address.street && App.user.address.zip && App.user.address.city && App.user.address.country;
+        return App.user && App.user.street && App.user.zip && App.user.city && App.user.country;
     }
 });

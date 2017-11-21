@@ -18,6 +18,7 @@ var dbModels = require('./utils/mongo');
 var WineModel = dbModels.WineModel;
 var ImageModel = dbModels.ImageModel;
 var UserModel = dbModels.UserModel;
+var OrderModel = dbModels.OrderModel;
 
 var getHash = function (password) {
     return bcrypt.hashSync(password, 10);
@@ -32,7 +33,15 @@ app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
 app.use(logger('dev'));
 app.use(methodOverride());
-app.use(session({ secret: salt/*, store: new RedisStore*/, cookie: { maxAge: 3600000 * 24 * 30 } }));
+app.use(session({
+    cookieName: 'session',
+    secret: 'eg[isfd-8yF9-7w2315df{}+Ijsli;;to8',
+    duration: 30 * 60 * 1000,
+    activeDuration: 5 * 60 * 1000,
+    httpOnly: true,
+    secure: true,
+    ephemeral: true
+}));
 
 // parse application/json
 app.use(bodyParser.urlencoded({
@@ -47,10 +56,9 @@ app.listen(config.port, function () {
 app.post('/login', function(req, res) {
     return UserModel.findOne({username: req.body.username}, function(err, user) {
         if (!err && user) {
-            log.error(req.body.password);
-            log.error(user.toJSON());
             if (verifyPassword(req.body.password, user.password)) {
-                return res.send(user);
+                req.session.user = user;
+                return res.send({user:user, sid: req.sessionID});
             }
             res.statusCode = 404;
             log.error('Username/password are not matched');
@@ -59,38 +67,6 @@ app.post('/login', function(req, res) {
         res.statusCode = 404;
         log.error('User not found');
         return res.send({ error: 'User not found' });
-    })
-});
-
-app.post('/signup', function(req, res) {
-    log.error(req.body.password);
-    var user = new UserModel({
-        username: req.body.username,
-        password: getHash(req.body.password),
-        email: req.body.email,
-        firstName: req.body.firstName,
-        lastName: req.body.lastName,
-        phone: req.body.phone,
-        'address.street': req.body.street,
-        'address.zip': req.body.zip,
-        'address.city': req.body.city,
-        'address.country': req.body.country
-    });
-
-    user.save(function (err) {
-        if (!err) {
-            return res.send({ status: 'OK', user: user });
-        } else {
-            console.log(err);
-            if(err.name === 'ValidationError') {
-                res.statusCode = 400;
-                res.send({ error: 'Validation error' });
-            } else {
-                res.statusCode = 500;
-                res.send({ error: 'Server error' });
-            }
-            log.error('Internal error(%d): %s',res.statusCode,err.message);
-        }
     });
 });
 
@@ -135,11 +111,61 @@ app.post('/wines', function(req, res) {
 });
 
 app.post('/users', function(req, res) {
-    res.send('POST users');
+    var user = new UserModel({
+        username: req.body.username,
+        password: getHash(req.body.password),
+        email: req.body.email,
+        firstName: req.body.firstName,
+        lastName: req.body.lastName
+    });
+
+    user.save(function (err) {
+        if (!err) {
+            req.session.user = user;
+            return res.send({ status: 'OK', user: user });
+        } else {
+            console.log(err);
+            if(err.name === 'ValidationError') {
+                res.statusCode = 400;
+                res.send({ error: 'Validation error' });
+            } else {
+                res.statusCode = 500;
+                res.send({ error: 'Server error' });
+            }
+            log.error('Internal error(%d): %s',res.statusCode,err.message);
+        }
+    });
+});
+
+app.post('/users/:id', function(req, res) {
+    var user = new UserModel({
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        phone: req.body.phone || '',
+        'address.street': req.body.street || '',
+        'address.zip': req.body.zip || '',
+        'address.city': req.body.city || '',
+        'address.country': req.body.country || ''
+    });
+
+    user.save(function (err) {
+        if (!err) {
+            return res.send({ status: 'OK', user: user });
+        } else {
+            console.log(err);
+            if(err.name === 'ValidationError') {
+                res.statusCode = 400;
+                res.send({ error: 'Validation error' });
+            } else {
+                res.statusCode = 500;
+                res.send({ error: 'Server error' });
+            }
+            log.error('Internal error(%d): %s',res.statusCode,err.message);
+        }
+    });
 });
 
 app.get('/users', function(req, res) {
-    console.log(req.query.username);
     var query = req.query;
 
     if (query && query.username) {
@@ -159,12 +185,41 @@ app.get('/users', function(req, res) {
     }
 });
 
-app.get('/bucket', function(req, res) {
-    res.send('GET bucket');
+app.post('/logout', function(req, res) {
+    req.session.destroy();
+    res.writeHead(200);
+    res.end();
 });
 
-app.post('/myorders', function(req, res) {
-    res.send('POST ORDER');
+app.post('/orders', function(req, res) {
+    var order = new OrderModel({
+        userId: req.body.userId,
+        totalSum: req.body.totalSum,
+        items: req.body.items
+    });
+
+    order.save(function (err) {
+        if (!err) {
+            req.items.forEach(function(item) {
+                WineModel.findById(item, function(product){
+                    product.toJSON().availableQuantity -= item.quantity;
+                    product.save();
+                })
+            });
+
+            return res.send({ statusCode: 200, msg: 'Order Saved!' });
+        } else {
+            console.log(err);
+            if(err.name === 'ValidationError') {
+                res.statusCode = 400;
+                res.send({ error: 'Validation error' });
+            } else {
+                res.statusCode = 500;
+                res.send({ error: 'Server error' });
+            }
+            log.error('Internal error(%d): %s',res.statusCode,err.message);
+        }
+    });
 });
 
 app.get('/myorders', function(req, res) {

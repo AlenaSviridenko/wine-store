@@ -6,6 +6,7 @@ App.Views.AppView = Backbone.View.extend({
         "click  #btn-home": "home",
         "click  #btn-mybucket": "mybucket",
         "click  #btn-account": "account",
+        "click  #btn-logout": "logout",
         "click #login": "toggleLogin",
         "click #signup": "toggleSignup",
         "submit #frm-login": "login"
@@ -15,17 +16,15 @@ App.Views.AppView = Backbone.View.extend({
         _.bindAll(this, 'render', 'search', 'home',  'mybucket', 'toggleLogin');
         this.eventAggregator.bind('itemAdded', this.render);
         this.template = _.template($('#header-template').html());
-
-        //$('#frm-login').on('submit', this.login);
     },
 
     render: function(e) {
-        //var template = ;
         this.$el.append(this.template({itemsLength: (e ? e.length : 0)}));
+        App.session = new App.Models.Session();
 
-        if (typeof App.user !== 'undefined') {
-            //$('.public').hide();
-            //$('.logged-in').show();
+        if (App.session.isLoggedIn()) {
+            App.user = JSON.parse(App.session.get('userData'));
+            this.toggleHeaders();
         }
 
         return this;
@@ -61,13 +60,12 @@ App.Views.AppView = Backbone.View.extend({
 
     logout: function(e) {
         e.preventDefault();
-        $.ajax({
-            type: 'POST',
-            url: '/json/logout',
-            dataType: 'json',
-            success: function(data) {
-                window.location = '/';
-            }
+        $.post('/logout', function() {
+            App.session.remove();
+            window.location = '/';
+        })
+        .fail(function(error) {
+            console.log(error);
         });
     },
 
@@ -93,6 +91,7 @@ App.Views.AppView = Backbone.View.extend({
 
         var username = $('#username').val();
         var password = $('#password').val();
+        var self = this;
 
         $.ajax({
             type: 'POST',
@@ -100,43 +99,24 @@ App.Views.AppView = Backbone.View.extend({
             dataType: 'json',
             data: { username: username, password: password },
             success: function(data) {
-                $('#header .public').hide();
-                $('#header .logged-in').show();
-                App.user = data;
+
+                if(data && data.user && data.sid) {
+                    self.toggleHeaders();
+
+                    App.user = data.user;
+                    App.session.save(data.sid, data.user);
+                }
+
                 $('#modal').modal('toggle');
             },
             error: function() {
                 $('#login-error').html('That username &amp; password was not found.').addClass('alert-message').addClass('error');
             }
         });
-
     },
 
-    signupqweqew: function(e) {
-        e.preventDefault();
-
-        if (!$(e.currentTarget).valid()) {
-            alert('!')
-        }
-        var username = $('#username').val();
-        var password = $('#password').val();
-
-        /*$.ajax({
-            type: 'POST',
-            url: '/login',
-            dataType: 'json',
-            data: { username: username, password: password },
-            success: function(data) {
-                $('#header .public').hide();
-                $('#header .logged-in').show();
-                App.user = data;
-                $('#modal').modal('toggle');
-            },
-            error: function() {
-                $('#login-error').html('That username &amp; password was not found.').addClass('alert-message').addClass('error');
-            }
-        });*/
-
+    toggleHeaders: function() {
+        $('#header .public').toggle();
+        $('#header .logged-in').toggle();
     }
-
 });

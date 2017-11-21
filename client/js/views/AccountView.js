@@ -2,7 +2,8 @@ var template = function() {
     return function() {
         var template1 = _.template($('#account-template').html());
         App.user.address = App.user.address || {};
-        return $('#app').html(template1({model: App.user}));
+        this.model.attributes = _.extend({}, this.model.attributes, App.user);
+        return $('#app').html(template1({model: this.model.toJSON()}));
     }
 };
 
@@ -21,10 +22,11 @@ App.Views.AccountView = Backbone.Epoxy.View.extend({
     bindings: {
         'input[name="firstName"]': 'value:firstName',
         'input[name="lastName"]': 'value:lastName',
-        'input[name="city"]': 'value:address.city',
-        'input[name="country"]': 'value:address.country',
-        'input[name="zip"]': 'value:address.zip',
-        'input[name="street"]': 'value:address.street'
+        'input[name="city"]': 'value:city',
+        'input[name="country"]': 'value:country',
+        'input[name="zip"]': 'value:zip',
+        'input[name="street"]': 'value:street',
+        'input[name="phone"]': 'value:phone'
     },
 
     setEditView: function(e) {
@@ -34,5 +36,11 @@ App.Views.AccountView = Backbone.Epoxy.View.extend({
         $('input[name="edit"]').toggle();
 
         $('input.edit').toggle();
+    },
+
+    validateAndSave: function() {
+        if (this.model.isValid(['firstName', 'lastName'])) {
+            this.model.save();
+        }
     }
 });
