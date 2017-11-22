@@ -37,6 +37,7 @@ App.Views.BucketView = Backbone.View.extend({
     },
 
     sendOrder: function() {
+        var self = this;
         if (!App.user) {
             alert('please, sign in or sign up for order');
             return;
@@ -49,13 +50,30 @@ App.Views.BucketView = Backbone.View.extend({
 
         if (this.addressFilledCorrectly()) {
             var collectionArray = this.collection.toJSON();
-            var itemsAray = collectionArray.reduce(function(item) {
-                return {
+            var itemsArray = collectionArray.reduce(function(acc, item) {
+                acc.push({
                     itemId: item._id,
                     quantity: item.quantity
-                }
+                });
+
+                return acc;
             }, []);
-            console.log('');
+
+            var order = new App.Models.Order({
+                items: itemsArray,
+                userId: App.user._id,
+                totalSum: this.countTotal()
+            });
+
+            order.save(null, {
+                success: function (result) {
+                    console.log('Success');
+                    self.collection.reset();
+                    self.fireSubscription();
+                    App.router.navigate('', true);
+                    alert('Success');
+                }
+            })
         }
     },
 

@@ -64,7 +64,21 @@ WinificationRouter = Backbone.Router.extend({
 
     account: function() {
         this.views.account = new App.Views.AccountView({model: new App.Models.User(App.user)});
-        this.views.account.render();
+        this.renderRoute(this.views.account);
+    },
+
+    renderRoute: function(view) {
+        if (this.currentView) {
+            this.currentView.remove();
+        }
+
+        //render the new view
+        $('#app').append(view.render().el);
+
+        //Set the current view
+        this.currentView = view;
+
+        return this;
     },
 
     setBody: function(view, auth) {

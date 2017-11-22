@@ -202,14 +202,37 @@ app.post('/orders', function(req, res) {
 
     order.save(function (err) {
         if (!err) {
-            req.items.forEach(function(item) {
-                WineModel.findById(item, function(product){
-                    product.toJSON().availableQuantity -= item.quantity;
-                    product.save();
-                })
+
+            var promises = req.body.items.map(function(item) {
+                return new Promise(function(resolve, reject) {
+                    WineModel.findById(item.itemId, function(err, product) {
+
+                        if (err) {
+                            return reject(err);
+                        }
+
+                        var newQuantity = product.toJSON().availableQuantity - item.quantity;
+                        product.set({availableQuantity: newQuantity});
+
+                        product.save(function(err) {
+                            if (err) {
+                                return reject(err);
+                            }
+
+                            resolve();
+                        });
+                    })
+                }(item))
             });
 
-            return res.send({ statusCode: 200, msg: 'Order Saved!' });
+            Promise.all(promises)
+                .then(function() {
+                    return res.send({ statusCode: 200, msg: 'Order Saved!' });
+                }, function () {
+                    res.statusCode = 500;
+                    res.send({ error: 'Server error' });
+                });
+
         } else {
             console.log(err);
             if(err.name === 'ValidationError') {

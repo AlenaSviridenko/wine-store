@@ -2,7 +2,7 @@ var template = function() {
     return function() {
         var template1 = _.template($('#account-template').html());
         this.model = new  App.Models.User(App.user);
-        return $('#app').html(template1({model: this.model.toJSON()}));
+        return template1({model: this.model.toJSON()});
     }
 };
 
@@ -29,7 +29,17 @@ App.Views.AccountView = Backbone.Epoxy.View.extend({
         'input[name="phone"]': 'value:phone'
     },
 
-    render: template(),
+    render: function() {
+        this.$el.empty();
+        this.$el.append(template());
+
+        $('#app').html(this.$el);
+
+        this.delegateEvents();
+        this.applyBindings();
+
+        return this;
+    },
 
     setEditView: function(e) {
         e.preventDefault();
