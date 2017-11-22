@@ -84,11 +84,13 @@ app.get('/wines', function(req, res) {
 app.post('/wines', function(req, res) {
     var wine = new WineModel({
         name: req.body.name,
-        'description.country': req.body['description.country'],
-        'description.year': req.body['description.year'],
-        'description.type': req.body['description.type'],
-        'description.desc': req.body['description.desc'],
-        images: new ImageModel({imgurl: req.body.images})
+        country: req.body.country,
+        year: req.body.year,
+        type: req.body.type,
+        desc: req.body.desc,
+        price: req.body.price,
+        availableQuantity: req.body.availableQuantity,
+        image: new ImageModel({imgurl: req.body.image})
     });
 
     wine.save(function (err) {

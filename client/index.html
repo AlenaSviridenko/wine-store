@@ -35,6 +35,7 @@
     <script src="js/views/BucketView.js"></script>
     <script src="js/views/SignUpView.js"></script>
     <script src="js/views/AccountView.js"></script>
+    <script src="js/views/NewItemView.js"></script>
 
     <script src="js/routes/winification-router.js"></script>
 
@@ -43,7 +44,7 @@
         <div id="redbar">
             <div class="wrap">
                 <ul class="logged-in">
-                    <li><a href="/" id="btn-additems">Add new item</a></li>
+                    <li><a href="/addItem" id="btn-additems">Add new item</a></li>
                     <li class="dropdown-head"><a href="/account" id="btn-account">My Account</a>
                         <div class="dropdown-content">
                             <a href="/myorders" id="btn-myorders">My orders</a>
@@ -73,13 +74,13 @@
     <script id="item-template" type="text/template">
         <tr>
             <td>
-                <img class="catalog-image" src="<%= model.images.imgurl %>" />
+                <img class="catalog-image" src="<%= model.image.imgurl %>" />
             </td>
             <td>
                 <span><%- model.name %></span>
-                <span><%- model.description.type %></span>
-                <span><%- model.description.country %>, <%- model.description.year %></span>
-                <span><%- model.description.desc  %></span>
+                <span><%- model.type %></span>
+                <span><%- model.country %>, <%- model.year %></span>
+                <span><%- model.desc %></span>
                 <span>$ <%- model.price %></span>
             </td>
             <td>
@@ -191,7 +192,7 @@
             <% _.each(collection, function(element) { %>
             <tr>
                 <td>
-                    <span><%= element.name + ', ' + element.description.type %></span>
+                    <span><%= element.name + ', ' + element.type %></span>
                 </td>
                 <td>
                     <span><%= element.quantity %></span>
@@ -254,6 +255,72 @@
                 <input type="button" name="edit" value="Edit information"/>
                 <input type="button" name="save" class="edit" value="Save" hidden/>
             </div>
+        </div>
+    </script>
+
+    <script id="newitem-template" type="text/template">
+        <div class="catalog">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" name="name"/>
+                <span class="help-block hidden"></span>
+            </div>
+            <div class="form-group">
+                <label for="lastName">Type</label>
+                <select type="text" name="type">
+                    <option value="" disabled selected>Select a type</option>
+                    <optgroup label="Red">
+                        <option value="red sweet">sweet</option>
+                        <option value="red semi-sweet">semi-sweet</option>
+                        <option value="red dry">dry</option>
+                        <option value="red semi-dry">semi-dry</option>
+                    </optgroup>
+                    <optgroup label="Rose">
+                        <option value="rose sweet">sweet</option>
+                        <option value="rose semi-sweet">semi-sweet</option>
+                        <option value="rose dry">dry</option>
+                        <option value="rose semi-dry">semi-dry</option>
+                    </optgroup>
+                    <optgroup label="White">
+                        <option value="white sweet">sweet</option>
+                        <option value="white semi-sweet">semi-sweet</option>
+                        <option value="white dry">dry</option>
+                        <option value="white semi-dry">semi-dry</option>
+                    </optgroup>
+                </select>
+                <span class="help-block hidden"></span>
+            </div>
+            <div class="form-group">
+                <label for="country">Country</label>
+                <input type="text" name="country"/>
+                <span class="help-block hidden"></span>
+            </div>
+            <div class="form-group">
+                <label for="year">Year</label>
+                <input type="text" name="year"/>
+                <span class="help-block hidden"></span>
+            </div>
+            <div class="form-group">
+                <label for="desc">Description</label>
+                <textarea name="desc"></textarea>
+                <span class="help-block hidden"></span>
+            </div>
+            <div class="form-group">
+                <label for="price">Price</label>
+                <input type="text" name="price"/>
+                <span class="help-block hidden"></span>
+            </div>
+            <div class="form-group">
+                <label for="quantity">Available Quantity</label>
+                <input type="text" name="quantity"/>
+                <span class="help-block hidden"></span>
+            </div>
+            <div class="form-group">
+                <label for="path">Image path</label>
+                <input type="text" name="path"/>
+                <span class="help-block hidden"></span>
+            </div>
+            <input type="button" name="save" value="Save" class="btn small success"  style="width: 60px" />
         </div>
     </script>
 

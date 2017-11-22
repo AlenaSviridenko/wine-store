@@ -1,0 +1,58 @@
+// using template as a function to use two-way binding with epoxy
+var itemTemplate = function() {
+    return function() {
+        var template = _.template($('#newitem-template').html());
+        return template();
+    }
+};
+
+App.Views.NewItemView = Backbone.Epoxy.View.extend({
+    el: itemTemplate(),
+
+    events: {
+        'click input[name="save"]': 'save',
+        'click button.close': 'close'
+    },
+
+    initialize: function() {
+        Backbone.Validation.bind(this);
+    },
+
+    bindings: {
+        'input[name="name"]': 'value:name',
+        'select[name="type"]': 'value:type',
+        'input[name="country"]': 'value:country',
+        'textarea[name="desc"]': 'value:desc',
+        'input[name="image"]': 'value:path',
+        'input[name="quantity"]': 'value:availableQuantity',
+        'input[name="price"]': 'value:price'
+    },
+
+    render: function(){
+        this.$el.empty();
+        this.$el.append(itemTemplate());
+
+        $('#app').html(this.$el);
+
+        this.delegateEvents();
+        this.applyBindings();
+
+        return this;
+    },
+
+    save: function() {
+        if (this.model.isValid(true)) {
+            this.model.image.imgurl = this.model.path;
+            this.model.price = parseInt(this.model.price);
+            this.model.save(null, {
+                success: function () {
+                    alert('Item saved!')
+                }
+            })
+        }
+    },
+
+    close: function() {
+        this.remove();
+    }
+});

@@ -7,6 +7,7 @@ App.Views.AppView = Backbone.View.extend({
         "click  #btn-mybucket": "mybucket",
         "click  #btn-account": "account",
         "click  #btn-logout": "logout",
+        "click  #btn-additems": 'addItem',
         "click #login": "toggleLogin",
         "click #signup": "toggleSignup",
         "submit #frm-login": "login"
@@ -56,6 +57,11 @@ App.Views.AppView = Backbone.View.extend({
     account: function(e) {
         e.preventDefault();
         App.router.navigate('account', true);
+    },
+
+    addItem: function(e) {
+        e.preventDefault();
+        App.router.navigate('addItem', true);
     },
 
     logout: function(e) {
@@ -113,5 +119,9 @@ App.Views.AppView = Backbone.View.extend({
     toggleHeaders: function() {
         $('#header .public').toggle();
         $('#header .logged-in').toggle();
+
+        if(!App.user.isAdmin) {
+            $('#btn-additems').hide();
+        }
     }
 });

@@ -22,13 +22,11 @@ var Images = new Schema({
 var Wine = new Schema({
     name: { type: String, required: true },
     price: { type: Number, required: true },
-    description: {
-        country: { type: String, required: true },
-        year: { type: Number, required: true },
-        type: { type: String, required: true },
-        desc: { type: String }
-    },
-    images: { type: Images, required: true },
+    country: { type: String, required: true },
+    year: { type: Number, required: true },
+    type: { type: String, required: true },
+    desc: { type: String },
+    image: { type: Images, required: true },
     availableQuantity: { type: Number, required: true }
 });
 

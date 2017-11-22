@@ -6,7 +6,7 @@ WinificationRouter = Backbone.Router.extend({
         "mytags":                               "tags",
         "search/*search":                       "search",
         "account":                              "account",
-        "bookmarklet/*params":                  "bookmarklet"
+        "addItem":                  "addItem"
     },
 
     views: {},
@@ -34,7 +34,8 @@ WinificationRouter = Backbone.Router.extend({
         //if the user is logged in, show their bookmarks, otherwise show the signup form
 
         this.views.public.fetch();
-        this.views.public.render();
+        this.renderRoute(this.views.public);
+        //this.views.public.render();
         /*if (typeof App.user !== 'undefined') {
             this.navigate("bookmarks", true);
         } else {
@@ -67,13 +68,18 @@ WinificationRouter = Backbone.Router.extend({
         this.renderRoute(this.views.account);
     },
 
+    addItem: function() {
+        this.views.addItem = new App.Views.NewItemView({model: new App.Models.Wine()});
+        this.renderRoute(this.views.addItem);
+    },
+
     renderRoute: function(view) {
         if (this.currentView) {
             this.currentView.remove();
         }
 
         //render the new view
-        $('#app').append(view.render().el);
+        view.render();
 
         //Set the current view
         this.currentView = view;
