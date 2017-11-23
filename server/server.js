@@ -82,33 +82,39 @@ app.get('/wines', function(req, res) {
 });
 
 app.post('/wines', function(req, res) {
-    var wine = new WineModel({
-        name: req.body.name,
-        country: req.body.country,
-        year: req.body.year,
-        type: req.body.type,
-        desc: req.body.desc,
-        price: req.body.price,
-        availableQuantity: req.body.availableQuantity,
-        image: new ImageModel({imgurl: req.body.image})
-    });
 
-    wine.save(function (err) {
-        if (!err) {
-            log.info('Wine saved!');
-            return res.send({ status: 'OK', wine: wine });
-        } else {
-            console.log(err);
-            if(err.name === 'ValidationError') {
-                res.statusCode = 400;
-                res.send({ error: 'Validation error' });
+    if (req.query && req.query.find) {
+        searchForItems(req, res);
+    } else {
+        var wine = new WineModel({
+            name: req.body.name,
+            country: req.body.country,
+            year: req.body.year,
+            type: req.body.type,
+            desc: req.body.desc,
+            price: req.body.price,
+            availableQuantity: req.body.availableQuantity,
+            image: new ImageModel({imgurl: req.body.image})
+        });
+
+        wine.save(function (err) {
+            if (!err) {
+                log.info('Wine saved!');
+                return res.send({ status: 'OK', wine: wine });
             } else {
-                res.statusCode = 500;
-                res.send({ error: 'Server error' });
+                console.log(err);
+                if(err.name === 'ValidationError') {
+                    res.statusCode = 400;
+                    res.send({ error: 'Validation error' });
+                } else {
+                    res.statusCode = 500;
+                    res.send({ error: 'Server error' });
+                }
+                log.error('Internal error(%d): %s',res.statusCode,err.message);
             }
-            log.error('Internal error(%d): %s',res.statusCode,err.message);
-        }
-    });
+        });
+    }
+
 });
 
 app.post('/users', function(req, res) {
@@ -253,52 +259,6 @@ app.get('/myorders', function(req, res) {
     res.send('GET orders');
 });
 
-app.get('/wines/:id', function(req, res) {
-    return WineModel.findById(req.params.id, function (err, wine) {
-        if(!wine) {
-            res.statusCode = 404;
-            return res.send({ error: 'Not found' });
-        }
-        if (!err) {
-            return res.send({ status: 'OK', wine: wine });
-        } else {
-            res.statusCode = 500;
-            log.error('Internal error(%d): %s', res.statusCode, err.message);
-            return res.send({ error: 'Server error' });
-        }
-    });
-});
-
-app.put('/wines/:id', function (req, res){
-    return WineModel.findById(req.params.id, function (err, wine) {
-        if(!wine) {
-            res.statusCode = 404;
-            return res.send({ error: 'Not found' });
-        }
-
-        wine.name = req.body.name;
-        wine.description.country = req.body.description.country;
-        wine.description.year = req.body.description.year;
-        wine.description.type = req.body.description.type;
-        wine.description.desc = req.body.description.desc;
-        wine.images = new ImageModel({imgurl: req.body.images});
-        return wine.save(function (err) {
-            if (!err) {
-                log.info("article updated");
-                return res.send({ status: 'OK', wine: wine });
-            } else {
-                if(err.name === 'ValidationError') {
-                    res.statusCode = 400;
-                    res.send({ error: 'Validation error' });
-                } else {
-                    res.statusCode = 500;
-                    res.send({ error: 'Server error' });
-                }
-                log.error('Internal error(%d): %s',res.statusCode,err.message);
-            }
-        });
-    });
-});
 
 app.delete('/wines/:id', function (req, res){
     return WineModel.findById(req.params.id, function (err, wine) {
@@ -335,4 +295,53 @@ app.use(function(err, req, res, next) {
 app.get('/ErrorExample', function(req, res, next){
     next(new Error('Random error!'));
 });
+
+var searchForItems = function(req, res) {
+    var query = req.query.find;
+    var searchObject = {
+        $or: [
+            {
+                country: {
+                    $regex: query.searchString
+                }
+            },
+            {
+                type: {
+                    $regex: query.searchString
+                }
+            },
+            {
+                desc: {
+                    $regex: query.searchString
+                }
+            },
+            {
+                name: {
+                    $regex: query.searchString
+                }
+            },
+            {
+                year: {
+                    $regex: query.searchString
+                }
+            }
+        ]
+    };
+
+    return WineModel.find(searchObject, function(err, items) {
+        if (!items) {
+            res.statusCode = 404;
+            res.send({ status: 'error', error: 'Items Nor found'})
+        }
+
+        if (!err) {
+            res.statusCode = 400;
+            res.send({error: 'Internal error'})
+        }
+
+        if (items) {
+            res.send({ status: 'OK', items: items});
+        }
+    })
+};
 
