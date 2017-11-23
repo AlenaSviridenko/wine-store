@@ -8,15 +8,14 @@ App.Views.PublicView = Backbone.View.extend({
     },
 
     fetch: function(options) {
+        options = options || {};
         var self = this;
-        this.collection.fetch(
-            {
-                success: function(collection, response) {
-                    collection = collection.toJSON();
-                    self.render(collection);
-                }
-            }
-        );
+        options.success = function(collection, response) {
+            collection = collection.toJSON();
+            self.render(collection);
+        };
+
+        this.collection.fetch(options);
     },
 
     render: function(collection) {

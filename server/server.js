@@ -70,22 +70,23 @@ app.post('/login', function(req, res) {
 });
 
 app.get('/wines', function(req, res) {
-    return WineModel.find(function (err, articles) {
-        if (!err) {
-            return res.send(articles);
-        } else {
-            res.statusCode = 500;
-            log.error('Internal error(%d): %s',res.statusCode,err.message);
-            return res.send({ error: 'Server error' });
-        }
-    });
+
+    if (req.query && req.query.finder) {
+        searchForItems(req, res);
+    } else {
+        return WineModel.find(req.query, function (err, articles) {
+            if (!err) {
+                return res.send(articles);
+            } else {
+                res.statusCode = 500;
+                log.error('Internal error(%d): %s', res.statusCode, err.message);
+                return res.send({error: 'Server error'});
+            }
+        });
+    }
 });
 
 app.post('/wines', function(req, res) {
-
-    if (req.query && req.query.find) {
-        searchForItems(req, res);
-    } else {
         var wine = new WineModel({
             name: req.body.name,
             country: req.body.country,
@@ -113,8 +114,6 @@ app.post('/wines', function(req, res) {
                 log.error('Internal error(%d): %s',res.statusCode,err.message);
             }
         });
-    }
-
 });
 
 app.post('/users', function(req, res) {
@@ -297,36 +296,40 @@ app.get('/ErrorExample', function(req, res, next){
 });
 
 var searchForItems = function(req, res) {
-    var query = req.query.find;
+    var query = JSON.parse(req.query.find);
     var searchObject = {
         $or: [
             {
                 country: {
-                    $regex: query.searchString
+                    $regex: query.searchString,
+                    $options: 'i'
                 }
             },
             {
                 type: {
-                    $regex: query.searchString
+                    $regex: query.searchString,
+                    $options: 'i'
                 }
             },
             {
                 desc: {
-                    $regex: query.searchString
+                    $regex: query.searchString,
+                    $options: 'i'
                 }
             },
             {
                 name: {
-                    $regex: query.searchString
-                }
-            },
-            {
-                year: {
-                    $regex: query.searchString
+                    $regex: query.searchString,
+                    $options: 'i'
                 }
             }
         ]
     };
+    if (!isNaN(query.searchString)) {
+        searchObject.$or.push({
+            year: query.searchString
+        });
+    }
 
     return WineModel.find(searchObject, function(err, items) {
         if (!items) {
@@ -334,7 +337,7 @@ var searchForItems = function(req, res) {
             res.send({ status: 'error', error: 'Items Nor found'})
         }
 
-        if (!err) {
+        if (err) {
             res.statusCode = 400;
             res.send({error: 'Internal error'})
         }

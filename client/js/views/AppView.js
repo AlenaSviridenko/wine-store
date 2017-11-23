@@ -10,11 +10,12 @@ App.Views.AppView = Backbone.View.extend({
         "click  #btn-additems": 'addItem',
         "click #login": "toggleLogin",
         "click #signup": "toggleSignup",
-        "submit #frm-login": "login"
+        "submit #frm-login": "login",
+        'submit #frm-search': 'search'
     },
 
     initialize: function() {
-        _.bindAll(this, 'render', 'search', 'home',  'mybucket', 'toggleLogin');
+        _.bindAll(this, 'render', 'search', 'home',  'mybucket', 'toggleLogin', 'search');
         this.eventAggregator.bind('itemAdded', this.render);
         this.template = _.template($('#header-template').html());
     },
@@ -34,13 +35,6 @@ App.Views.AppView = Backbone.View.extend({
     home: function(e) {
         e.preventDefault();
         App.router.navigate('', true);
-    },
-
-    search: function(e) {
-        e.preventDefault();
-        var term = $(e.target).find('input').val();
-        $(e.target).find('input').val('').blur();
-        App.router.navigate('search/' + term, true);
     },
 
     myorders: function(e) {
@@ -114,6 +108,24 @@ App.Views.AppView = Backbone.View.extend({
             .fail( function() {
                 $('#login-error').html('That username &amp; password was not found.').addClass('alert-message').addClass('error');
         });
+    },
+
+    search: function(e) {
+        e.preventDefault();
+        var value = $('input[name="searchBox"]').val() || '';
+
+        App.router.navigate('search/' + value, true);
+
+        /*var searchObj = {
+            searchString: value
+        };
+        $.get('/wines?find=' + JSON.stringify(searchObj))
+            .then(function(collection) {
+                var public = new App.Views.PublicView();
+                public.render(collection.items);
+            }, function (error) {
+                alert(error.error);
+            });*/
     },
 
     toggleHeaders: function() {

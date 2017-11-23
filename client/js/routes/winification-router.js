@@ -12,7 +12,7 @@ WinificationRouter = Backbone.Router.extend({
     views: {},
 
     initialize: function() {
-        _.bindAll(this, 'index', 'bucket', 'tag', 'tags', 'search', 'setBody');
+        _.bindAll(this, 'index', 'bucket', 'tag',  'setBody');
 
         this.views.app = new App.Views.AppView();
         this.views.public = new App.Views.PublicView();
@@ -54,13 +54,35 @@ WinificationRouter = Backbone.Router.extend({
     },
 
     search: function(search) {
-        this.setBody(this.views.bookmarks, true);
-        this.view.body.fetch({ data: { search: search } });
-    },
-
-    tags: function() {
-        this.setBody(this.views.tags, true);
-        this.view.body.fetch();
+        var searchObject = {
+            $or: [
+                {
+                    country: {
+                        $regex: search,
+                        $options: 'i'
+                    }
+                },
+                {
+                    type: {
+                        $regex: search,
+                        $options: 'i'
+                    }
+                },
+                {
+                    desc: {
+                        $regex: search,
+                        $options: 'i'
+                    }
+                },
+                {
+                    name: {
+                        $regex: search,
+                        $options: 'i'
+                    }
+                }
+            ]
+        };
+        this.views.public.fetch({ data: searchObject });
     },
 
     account: function() {
