@@ -9,9 +9,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "async": "^2.6.0",
     "bcrypt": "^1.0.3",
-    "client-sessions": "latest",
     "body-parser": "1.8",
+    "client-sessions": "latest",
     "errorhandler": "*",
     "express": "4.8.*",
     "express-session": "*",

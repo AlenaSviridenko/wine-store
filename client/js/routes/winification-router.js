@@ -6,51 +6,37 @@ WinificationRouter = Backbone.Router.extend({
         "mytags":                               "tags",
         "search/*search":                       "search",
         "account":                              "account",
-        "addItem":                  "addItem"
+        "addItem":                  "addItem",
+        "myorders": 'myorders'
     },
 
     views: {},
 
     initialize: function() {
-        _.bindAll(this, 'index', 'bucket', 'tag',  'setBody');
+        _.bindAll(this, 'index', 'bucket', 'myorders',  'setBody');
 
         this.views.app = new App.Views.AppView();
         this.views.public = new App.Views.PublicView();
         App.globals.bucket = new App.Views.BucketView({collection: new App.Collections.BucketCollection()});
-        /*//Create all the views, but don't render them on screen until needed
-
-        this.views.bookmarks = new BookmarksView();
-        this.views.pub = new PublicView();
-        this.views.tags = new TagsView();
-        this.views.account = new AccountView();*/
-
-        //The "app view" is the layout, containing the header and footer, for the app
-        //The body area is rendered by other views
-        //this.view = this.views.app;
         this.views.app.render();
     },
 
     index: function() {
-        //if the user is logged in, show their bookmarks, otherwise show the signup form
-
         this.views.public.fetch();
         this.renderRoute(this.views.public);
-        //this.views.public.render();
-        /*if (typeof App.user !== 'undefined') {
-            this.navigate("bookmarks", true);
-        } else {
-            this.setBody(this.views.pub);
-            this.view.body.render();
-        }*/
     },
 
     bucket: function() {
         App.globals.bucket.render();
     },
 
-    tag: function(tag) {
-        this.setBody(this.views.bookmarks, true);
-        this.view.body.fetch({ data: { tag: tag } });
+    myorders: function() {
+        this.views.myorders = new App.Views.MyOdersView({collection: new App.Collections.OrderCollection()});
+        var userQuery = {
+            userId: App.user._id
+        };
+        this.views.myorders.fetch({ data: userQuery });
+        this.renderRoute(this.views.myorders);
     },
 
     search: function(search) {
@@ -83,6 +69,7 @@ WinificationRouter = Backbone.Router.extend({
             ]
         };
         this.views.public.fetch({ data: searchObject });
+        this.renderRoute(this.views.public);
     },
 
     account: function() {
@@ -109,7 +96,7 @@ WinificationRouter = Backbone.Router.extend({
         return this;
     },
 
-    setBody: function(view, auth) {
+    setBody: function(view) {
         if (auth == true && typeof App.user == 'undefined') {
             this.navigate("", true);
             return;

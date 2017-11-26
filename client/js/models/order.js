@@ -1,5 +1,5 @@
 App.Models.Order = Backbone.Model.extend({
-    urlRoot: '/orders',
+    url: '/orders',
     defaults: {
         items: [],
         userId: '',

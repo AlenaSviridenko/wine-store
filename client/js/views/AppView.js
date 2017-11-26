@@ -8,10 +8,11 @@ App.Views.AppView = Backbone.View.extend({
         "click  #btn-account": "account",
         "click  #btn-logout": "logout",
         "click  #btn-additems": 'addItem',
+        "click  #btn-myorders": 'myOrders',
         "click #login": "toggleLogin",
         "click #signup": "toggleSignup",
         "submit #frm-login": "login",
-        'submit #frm-search': 'search'
+        'click input[name="search"]': 'search'
     },
 
     initialize: function() {
@@ -21,6 +22,7 @@ App.Views.AppView = Backbone.View.extend({
     },
 
     render: function(e) {
+        this.$el.empty();
         this.$el.append(this.template({itemsLength: (e ? e.length : 0)}));
         App.session = new App.Models.Session();
 
@@ -37,9 +39,9 @@ App.Views.AppView = Backbone.View.extend({
         App.router.navigate('', true);
     },
 
-    myorders: function(e) {
+    myOrders: function(e) {
         e.preventDefault();
-        App.router.navigate('mytags', true);
+        App.router.navigate('myorders', true);
     },
 
     mybucket: function(e) {
@@ -97,10 +99,9 @@ App.Views.AppView = Backbone.View.extend({
 
         $.post('/login', data,  function(data){
                 if(data && data.user && data.sid) {
-                    self.toggleHeaders();
-
                     App.user = data.user;
                     App.session.save(data.sid, data.user);
+                    self.toggleHeaders();
                 }
 
                 $('#modal').modal('toggle');
@@ -115,24 +116,13 @@ App.Views.AppView = Backbone.View.extend({
         var value = $('input[name="searchBox"]').val() || '';
 
         App.router.navigate('search/' + value, true);
-
-        /*var searchObj = {
-            searchString: value
-        };
-        $.get('/wines?find=' + JSON.stringify(searchObj))
-            .then(function(collection) {
-                var public = new App.Views.PublicView();
-                public.render(collection.items);
-            }, function (error) {
-                alert(error.error);
-            });*/
     },
 
     toggleHeaders: function() {
-        $('#header .public').toggle();
-        $('#header .logged-in').toggle();
+        $('.public').toggle();
+        $('.logged-in').toggle();
 
-        if(!App.user.isAdmin) {
+        if(App.user && !App.user.isAdmin) {
             $('#btn-additems').hide();
         }
     }

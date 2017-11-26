@@ -28,24 +28,27 @@
     <script src="js/models/order.js"></script>
     <script src="js/models/wines-collection.js"></script>
     <script src="js/models/bucket-collection.js"></script>
+    <script src="js/models/orders-collection.js"></script>
 
     <script src="js/views/AppView.js"></script>
     <script src="js/views/ItemView.js"></script>
+    <script src="js/views/SingleOrderView.js"></script>
     <script src="js/views/PublicView.js"></script>
     <script src="js/views/BucketView.js"></script>
     <script src="js/views/SignUpView.js"></script>
     <script src="js/views/AccountView.js"></script>
     <script src="js/views/NewItemView.js"></script>
+    <script src="js/views/MyOrdersView.js"></script>
 
     <script src="js/routes/winification-router.js"></script>
 
     <script id="header-template" type="text/template">
         <div id="modal"></div>
-        <div id="redbar">
+        <div id="red-bar">
             <div class="wrap">
                 <ul class="logged-in">
-                    <li><a href="/addItem" id="btn-additems">Add new item</a></li>
-                    <li class="dropdown-head"><a href="/account" id="btn-account">My Account</a>
+                    <li><a href="/addItem" id="btn-additems" hidden>Add new item</a></li>
+                    <li class="dropdown-head"><a href="/account" id="btn-account" hidden>My Account</a>
                         <div class="dropdown-content">
                             <a href="/myorders" id="btn-myorders">My orders</a>
                             <a id="btn-logout">Sign out</a>
@@ -64,10 +67,10 @@
                 </ul>
 
                 <ul class="logo">
-                    <li><a href="/" id="btn-home"><img src="images/logo.png" alt="Winification" /></a></li>
-                    <li><form id="frm-search"><input name="searchBox" placeholder="Search wines" class="span3"/>
-                        <input type="submit" value="Search" name="submit"/>
-                    </form></li>
+                    <li><a href="/" id="btn-home"><img src="http:\\localhost:3001\images\logo.png" alt="Winification" /></a></li>
+                    <li><input name="searchBox" placeholder="Search wines" class="span3 searchBox" autocomplete="off"/>
+                        <input type="submit" value="Search" name="search"/>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -101,29 +104,29 @@
     </script>
 
     <script id="login-template" type="text/template">
-        <div class="modal-content">
+        <div class="modal-content login-modal">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
             </div>
             <form id="frm-login">
+                <div class="modal-body">
                 <fieldset>
-                    <div class="modal-body">
-                        <div style="float: left; margin-right: 10px">
-                            Username<br />
-                            <input type="text" id="username" name="username" style="width: 130px" />
-                        </div>
-                        <div style="float: left; margin-right: 10px">
-                            Password<br />
-                            <input type="password" id="password" name="password" style="width: 130px" />
-                        </div>
+                    <div style="float: left; margin-right: 10px">
+                        Username<br />
+                        <input type="text" class="form-control" id="username" name="username"/>
                     </div>
-                    <div class="modal-footer">
-                        <div style="float: left">
-                            &nbsp;<br />
-                            <input type="submit" name="submit" value="Sign in" class="btn small success"  style="width: 60px" />
-                        </div>
+                    <div style="float: left; margin-right: 10px">
+                        Password<br />
+                        <input type="password" class="form-control" id="password" name="password"/>
+                    </div>
+                    <div style="float: left; margin-right: 10px">
+                        <span id="login-error"></span>
                     </div>
                 </fieldset>
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" name="submit" value="Sign in" class="btn btn-default"/>
+                </div>
             </form>
         </div>
     </script>
@@ -134,46 +137,68 @@
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
             </div>
             <form id="frm-signup">
+                <div class="modal-body">
                 <fieldset>
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <label for="firstName">First Name</label>
-                            <input type="text" name="firstName" id="firstName" style="width: 130px"/>
-                            <span class="help-block hidden"></span>
-                        </div>
-                        <div class="form-group">
-                            <label for="lastName">Last Name</label>
-                            <input type="text" name="lastName" id="lastName" style="width: 130px"/>
-                            <span class="help-block hidden"></span>
-                        </div>
-                        <div class="form-group">
-                            <label for="email">Email</label>
-                            <input type="email" name="email" id="email" style="width: 130px" placeholder="email@example.com"/>
-                            <span class="help-block hidden"></span>
-                        </div>
-                        <div class="form-group">
-                            <label for="username">Username</label>
-                            <input type="text" name="username" id="username" style="width: 130px" />
-                            <span class="help-block hidden"></span>
-                        </div>
-                        <div class="form-group">
-                            <label for="password">Password</label>
-                            <input type="password" name="password" id="password" style="width: 130px" />
-                            <span class="help-block hidden"></span>
-                        </div>
-                        <div class="form-group">
-                            <label for="confirmPassword">Confirm password</label>
-                            <input type="password" name="confirmPassword" id="confirmPassword" style="width: 130px" />
-                            <span class="help-block hidden"></span>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <div style="float: left">
-                            &nbsp;<br />
-                            <input type="submit" name="submit" value="Sign up" class="btn small success"  style="width: 60px" />
-                        </div>
-                    </div>
+                    <table border="0">
+                        <tbody>
+                        <tr>
+                            <td>
+                                <div class="form-group">
+                                    <label for="firstName">First Name</label>
+                                    <input class="form-control" type="text" name="firstName" id="firstName"/>
+                                    <span class="help-block hidden"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group">
+                                    <label for="lastName">Last Name</label>
+                                    <input class="form-control" type="text" name="lastName" id="lastName"/>
+                                    <span class="help-block hidden"></span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="form-group">
+                                    <label for="email">Email</label>
+                                    <input class="form-control" type="email" name="email" id="email" placeholder="email@example.com"/>
+                                    <span class="help-block hidden"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group">
+                                    <label for="username">Username</label>
+                                    <input class="form-control" type="text" name="username" id="username"/>
+                                    <span class="help-block hidden"></span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="form-group">
+                                    <label for="password">Password</label>
+                                    <input class="form-control" type="password" name="password" id="password"/>
+                                    <span class="help-block hidden"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group">
+                                    <label for="confirmPassword">Confirm password</label>
+                                    <input class="form-control" type="password" name="confirmPassword" id="confirmPassword"/>
+                                    <span class="help-block hidden"></span>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
                 </fieldset>
+                </div>
+                <div class="modal-footer">
+                    <div style="float: left">
+                        &nbsp;<br />
+                        <input type="submit" name="submit" value="Sign up" class="btn small success"/>
+                    </div>
+                </div>
             </form>
         </div>
     </script>
@@ -326,6 +351,33 @@
         </div>
     </script>
 
+    <script id="order-template" type="text/template">
+        <tr>
+            <th>Name</th>
+            <th>Quantity</th>
+            <th>Total</th>
+        </tr>
+        <% _.each(model.items, function(item) { %>
+        <tr>
+            <td>
+                <span><%= item.details.name + ', ' + item.details.type %></span>
+            </td>
+            <td>
+                <span><%= item.quantity %></span>
+            </td>
+        </tr>
+        <% }); %>
+        <tr>
+            <td colspan="2">Total Sum:</td>
+            <td><%= model.totalSum %></td>
+        </tr>
+    </script>
+
+    <script id="order-list-template" type="text/template">
+        <table class="orders">
+        </table>
+    </script>
+
     <script id="footer-template" type="text/template">
         <div class="wrap">
             <div class="inner">
@@ -333,7 +385,6 @@
             </div>
         </div>
     </script>
-
 
     <script type="text/javascript">
         $(function() {

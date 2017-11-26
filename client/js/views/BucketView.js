@@ -8,7 +8,8 @@ App.Views.BucketView = Backbone.View.extend({
 
     initialize: function() {
         _.bindAll(this, 'render');
-        this.collection.on('add', this.fireSubscription, this);
+        this.listenTo(this.collection, 'add', this.fireSubscription);
+        this.listenTo(this.collection, 'change', this.fireSubscription);
 
         this.template = _.template($('#bucket-template').html());
     },

@@ -1,10 +1,9 @@
-App.Views.PublicView = Backbone.View.extend({
+App.Views.MyOdersView = Backbone.View.extend({
     tagName: 'table',
     className: 'catalog',
 
     initialize: function() {
         _.bindAll(this, 'fetch', 'render');
-        this.collection = new App.Collections.WinesCollection();
     },
 
     fetch: function(options) {
@@ -29,8 +28,8 @@ App.Views.PublicView = Backbone.View.extend({
             this.$el.empty();
 
             _.each(collection, function(item) {
-                var itemView = new App.Views.ItemView({model: item});
-                this.$el.append(itemView.render().el)
+                var orderView = new App.Views.SingleOrderView({model: item});
+                this.$el.append(orderView.render().el)
             }, this);
 
             $('#app').html(this.$el);

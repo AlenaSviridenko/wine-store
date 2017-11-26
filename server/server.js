@@ -1,18 +1,16 @@
 var express = require('express');
+var mongoose = require('mongoose');
 var path = require('path');
+var async = require('async');
 var bcrypt = require('bcrypt');
 var log = require('./utils/log')(module);
 var config = require('./config.json');
 
-var express = require('express');
-var favicon = require('serve-favicon');
 var logger = require('morgan');
-var methodOverride = require('method-override');
 var session = require('express-session');
 var bodyParser = require('body-parser');
 var app = express();
 
-var salt = '20sdkfjk23';
 var dbModels = require('./utils/mongo');
 
 var WineModel = dbModels.WineModel;
@@ -28,11 +26,20 @@ var verifyPassword = function(password, hash) {
  return bcrypt.compareSync(password, hash);
 };
 
+var Errors = {
+    Validation: 'ValidationError',
+    Server: 'Server Error',
+    Internal: 'Internal Error',
+    UserNotFound: 'User not found',
+    WrongPassword: 'Username/password are not matched',
+    UpdateItem: 'Quantity update failed',
+    NotFoundItems: 'Not all item found in database',
+    NotFoundUrl: 'Not found URL',
+    Forbidden: 'Access Forbidden'
+};
+
 app.set('port', config.port);
-app.set('views', __dirname + '/views');
-app.set('view engine', 'jade');
 app.use(logger('dev'));
-app.use(methodOverride());
 app.use(session({
     cookieName: 'session',
     secret: 'eg[isfd-8yF9-7w2315df{}+Ijsli;;to8',
@@ -59,61 +66,74 @@ app.post('/login', function(req, res) {
                 req.session.user = user;
                 return res.send({user:user, sid: req.sessionID});
             }
-            res.statusCode = 404;
-            log.error('Username/password are not matched');
-            return res.send({ error: 'Username/password are not matched' });
+            var details = {
+                code: 404,
+                error: Errors.WrongPassword
+            };
+            errorHandler(res, req, details);
         }
-        res.statusCode = 404;
-        log.error('User not found');
-        return res.send({ error: 'User not found' });
+        var details = {
+            code: 404,
+            error: Errors.UserNotFound
+        };
+        errorHandler(res, req, details);
     });
 });
 
 app.get('/wines', function(req, res) {
-
-    if (req.query && req.query.finder) {
-        searchForItems(req, res);
-    } else {
-        return WineModel.find(req.query, function (err, articles) {
-            if (!err) {
-                return res.send(articles);
-            } else {
-                res.statusCode = 500;
-                log.error('Internal error(%d): %s', res.statusCode, err.message);
-                return res.send({error: 'Server error'});
-            }
-        });
-    }
+    return WineModel.find(req.query, function (err, articles) {
+        if (!err) {
+            return res.send(articles);
+        } else {
+            var details = {
+                code: 500,
+                error: Errors.Server
+            };
+            errorHandler(res, req, details, err);
+        }
+    });
 });
 
 app.post('/wines', function(req, res) {
-        var wine = new WineModel({
-            name: req.body.name,
-            country: req.body.country,
-            year: req.body.year,
-            type: req.body.type,
-            desc: req.body.desc,
-            price: req.body.price,
-            availableQuantity: req.body.availableQuantity,
-            image: new ImageModel({imgurl: req.body.image})
-        });
+    if (!req.session.user) {
+        var details = {
+            code: 403,
+            error: Errors.Forbidden
+        };
+        errorHandler(res, req, details);
+    }
 
-        wine.save(function (err) {
-            if (!err) {
-                log.info('Wine saved!');
-                return res.send({ status: 'OK', wine: wine });
+    var wine = new WineModel({
+        name: req.body.name,
+        country: req.body.country,
+        year: req.body.year,
+        type: req.body.type,
+        desc: req.body.desc,
+        price: req.body.price,
+        availableQuantity: req.body.availableQuantity,
+        image: new ImageModel({imgurl: req.body.image})
+    });
+
+    wine.save(function (err) {
+        if (!err) {
+            log.info('Wine saved!');
+            return res.send({ status: 'OK', wine: wine });
+        } else {
+            var details = {
+                code: 0,
+                error: ''
+            };
+            if(err.name === Errors.Validation) {
+                details.code = 400;
+                details.error = Errors.Validation;
+                errorHandler(res, req, details, err);
             } else {
-                console.log(err);
-                if(err.name === 'ValidationError') {
-                    res.statusCode = 400;
-                    res.send({ error: 'Validation error' });
-                } else {
-                    res.statusCode = 500;
-                    res.send({ error: 'Server error' });
-                }
-                log.error('Internal error(%d): %s',res.statusCode,err.message);
+                details.code = 500;
+                details.error = Errors.Server;
+                errorHandler(res, req, details, err);
             }
-        });
+        }
+    });
 });
 
 app.post('/users', function(req, res) {
@@ -130,46 +150,19 @@ app.post('/users', function(req, res) {
             req.session.user = user;
             return res.send({ status: 'OK', user: user });
         } else {
-            console.log(err);
-            if(err.name === 'ValidationError') {
-                res.statusCode = 400;
-                res.send({ error: 'Validation error' });
+            var details = {
+                code: 0,
+                error: ''
+            };
+            if(err.name === Errors.Validation) {
+                details.code = 400;
+                details.error = Errors.Validation;
+                errorHandler(res, req, details, err);
             } else {
-                res.statusCode = 500;
-                res.send({ error: 'Server error' });
+                details.code = 500;
+                details.error = Errors.Server;
+                errorHandler(res, req, details, err);
             }
-            log.error('Internal error(%d): %s',res.statusCode,err.message);
-        }
-    });
-});
-
-app.put('/users/:id', function(req, res) {
-    UserModel.findById(req.params.id, function(err, user) {
-        if (!user) {
-            res.statusCode = 404;
-            return res.send({error: 'Not updated, user not found'})
-        }
-
-        if (user) {
-            user.address = user.address || {};
-
-            user.firstName = req.body.firstName;
-            user.lastName = req.body.lastName;
-            user.phone = req.body.phone || '';
-            user.street = req.body.street || '';
-            user.zip = req.body.zip || '';
-            user.city = req.body.city || '';
-            user.country = req.body.country || '';
-
-            user.save(user, function(err) {
-                if (err) {
-                    res.statusCode = 500;
-                    return res.send({error: 'Internal error while saving'})
-                }
-                res.statusCode = 200;
-                return res.send({status: 'OK', user: user});
-            })
-
         }
     });
 });
@@ -186,9 +179,11 @@ app.get('/users', function(req, res) {
                 res.statusCode = 403;
                 return res.send(user);
             } else {
-                res.statusCode = 500;
-                log.error('Internal error(%d): %s',res.statusCode,err.message);
-                return res.send({ error: 'Server error' });
+                var details = {
+                    code: 500,
+                    error: Errors.Server
+                };
+                errorHandler(res, req, details, err);
             }
         });
     }
@@ -201,6 +196,14 @@ app.post('/logout', function(req, res) {
 });
 
 app.post('/orders', function(req, res) {
+    if (!req.session.user) {
+        var details = {
+            code: 403,
+            error: Errors.Forbidden
+        };
+        errorHandler(res, req, details);
+    }
+
     var order = new OrderModel({
         userId: req.body.userId,
         totalSum: req.body.totalSum,
@@ -209,142 +212,144 @@ app.post('/orders', function(req, res) {
 
     order.save(function (err) {
         if (!err) {
+            var arrayOfIds = {
+                $in: []
+            };
 
-            var promises = req.body.items.map(function(item) {
-                return new Promise(function(resolve, reject) {
-                    WineModel.findById(item.itemId, function(err, product) {
-
-                        if (err) {
-                            return reject(err);
-                        }
-
-                        var newQuantity = product.toJSON().availableQuantity - item.quantity;
-                        product.set({availableQuantity: newQuantity});
-
-                        product.save(function(err) {
-                            if (err) {
-                                return reject(err);
-                            }
-
-                            resolve();
-                        });
-                    })
-                }(item))
+            req.body.items.forEach(function(item){
+                arrayOfIds.$in.push(mongoose.Types.ObjectId(item.itemId));
             });
 
-            Promise.all(promises)
-                .then(function() {
-                    return res.send({ statusCode: 200, msg: 'Order Saved!' });
-                }, function () {
-                    res.statusCode = 500;
-                    res.send({ error: 'Server error' });
+            var promise =  WineModel.find({'_id': arrayOfIds}).exec();
+            promise.then(function(result) {
+
+                var promises = [];
+                req.body.items.forEach(function(item) {
+                    var model = result.filter(function(res) {
+                        res = res.toJSON();
+                        return res._id.equals(mongoose.Types.ObjectId(item.itemId));
+                    })[0];
+
+                    var newQuantity = model.toJSON().availableQuantity - item.quantity;
+                    model.set({availableQuantity: newQuantity});
+
+                    promises.push(model.save());
                 });
 
+                Promise.all(promises)
+                    .then(function(result) {
+                        res.statusCode = 200;
+                        return res.send({status: 'OK', message: 'Order Saved!'});
+                    },function(err) {
+                        var details = {
+                            code: 400,
+                            error: Errors.UpdateItem
+                        };
+                        errorHandler(res, req, details);
+                    });
+            }, function(err) {
+                var details = {
+                    code: 400,
+                    error: Errors.NotFoundItems
+                };
+                errorHandler(res, req, details);
+            });
         } else {
-            console.log(err);
-            if(err.name === 'ValidationError') {
-                res.statusCode = 400;
-                res.send({ error: 'Validation error' });
+            var details = {
+                code: 0,
+                error: ''
+            };
+            if(err.name === Errors.Validation) {
+                details.code = 400;
+                details.error = Errors.Validation;
+                errorHandler(res, req, details, err);
             } else {
-                res.statusCode = 500;
-                res.send({ error: 'Server error' });
+                details.code = 500;
+                details.error = Errors.Server;
+                errorHandler(res, req, details, err);
             }
-            log.error('Internal error(%d): %s',res.statusCode,err.message);
         }
     });
 });
 
-app.get('/myorders', function(req, res) {
-    res.send('GET orders');
-});
-
-
-app.delete('/wines/:id', function (req, res){
-    return WineModel.findById(req.params.id, function (err, wine) {
-        if(!wine) {
-            res.statusCode = 404;
-            return res.send({ error: 'Not found' });
-        }
-        return wine.remove(function (err) {
-            if (!err) {
-                log.info("article removed");
-                return res.send({ status: 'OK' });
-            } else {
-                res.statusCode = 500;
-                log.error('Internal error(%d): %s', res.statusCode, err.message);
-                return res.send({ error: 'Server error' });
-            }
-        });
-    });
-});
-
-app.use(function(req, res, next){
-    res.status(404);
-    log.debug('Not found URL: %s',req.url);
-    res.send({ error: 'Not found' });
-});
-
-app.use(function(err, req, res, next) {
-    console.log(err);
-    res.status(err.status || 500);
-    log.error('Internal error(%d): %s',res.statusCode,err.message);
-    res.send({ error: err.message });
-});
-
-app.get('/ErrorExample', function(req, res, next){
-    next(new Error('Random error!'));
-});
-
-var searchForItems = function(req, res) {
-    var query = JSON.parse(req.query.find);
-    var searchObject = {
-        $or: [
-            {
-                country: {
-                    $regex: query.searchString,
-                    $options: 'i'
-                }
-            },
-            {
-                type: {
-                    $regex: query.searchString,
-                    $options: 'i'
-                }
-            },
-            {
-                desc: {
-                    $regex: query.searchString,
-                    $options: 'i'
-                }
-            },
-            {
-                name: {
-                    $regex: query.searchString,
-                    $options: 'i'
-                }
-            }
-        ]
-    };
-    if (!isNaN(query.searchString)) {
-        searchObject.$or.push({
-            year: query.searchString
-        });
+app.get('/orders', function(req, res) {
+    if (!req.session.user) {
+        var details = {
+            code: 403,
+            error: Errors.Forbidden
+        };
+        errorHandler(res, req, details);
     }
 
-    return WineModel.find(searchObject, function(err, items) {
-        if (!items) {
-            res.statusCode = 404;
-            res.send({ status: 'error', error: 'Items Nor found'})
-        }
+    var query = req.query;
+    return OrderModel.find(query, function(err, orders) {
+        var asyncOperations = [];
+        orders.forEach(function(order) {
+            asyncOperations.push(function(callback) {
+                var orderItems = order.toJSON().items;
+                var ids = {
+                    $in: []
+                };
 
-        if (err) {
-            res.statusCode = 400;
-            res.send({error: 'Internal error'})
-        }
+                orderItems.forEach(function(item) {
+                    ids.$in.push(mongoose.Types.ObjectId(item.itemId));
+                });
 
-        if (items) {
-            res.send({ status: 'OK', items: items});
-        }
+                var promise = WineModel.find({_id: ids}).exec();
+
+                promise.then(function(result) {
+                    orderItems.forEach(function(item) {
+                        var details = result.filter(function(res) {
+                            res = res.toJSON();
+                            return res._id.equals(mongoose.Types.ObjectId(item.itemId));
+                        })[0];
+
+                        item.details = details.toJSON();
+                    });
+                    order.set({items: orderItems});
+                    callback(null, order);
+                }, function(err) {
+                    callback(err, null);
+                });
+            });
+        });
+
+        async.parallel(asyncOperations, function(error, result){
+            if (!error) {
+                return res.send(result);
+            } else {
+                var details = {
+                    code: 400,
+                    error: Errors.NotFoundItems
+                };
+                errorHandler(res, req, details, err);
+            }
+        })
+
     })
-};
+});
+
+// unknown road
+app.use(function(req, res, next){
+    var details = {
+        code: 404,
+        error: Errors.NotFoundUrl
+    };
+    errorHandler(res, req, details);
+});
+
+app.use(function(err, req, res) {
+    var details = {
+        code: 500,
+        error: Errors.Internal
+    };
+    errorHandler(res, req, details, err);
+});
+
+var errorHandler = function (res, req, details, err) {
+    res.statusCode = details.code;
+    var codeError = err ? err.message : '';
+    log.error(details.error + '(%d): %s', res.statusCode, codeError);
+    return res.send({ error: details.error });
+}
 

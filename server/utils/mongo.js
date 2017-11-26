@@ -1,4 +1,4 @@
-var mongoose = require('mongoose').set('debug', true);
+var mongoose = require('mongoose');//.set('debug', true);
 var log = require('./log')(module);
 var config = require('../config.json');
 
@@ -28,7 +28,7 @@ var Wine = new Schema({
     desc: { type: String },
     image: { type: Images, required: true },
     availableQuantity: { type: Number, required: true }
-});
+},{ collection: 'wines' });
 
 var User = new Schema({
     username: { type: String, required: true },
@@ -48,11 +48,12 @@ var Order = new Schema({
     items: [
         {
             itemId: { type: String, required: true },
-            quantity: { type: Number, required: true }
+            quantity: { type: Number, required: true },
+            details: { type: Wine },
         }
     ],
     totalSum: { type: Number, required: true }
-});
+},{ collection: 'orders' });
 
 module.exports.WineModel = mongoose.model('Wines', Wine);
 module.exports.ImageModel = mongoose.model('Images', Images);

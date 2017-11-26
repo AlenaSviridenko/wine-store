@@ -8,19 +8,18 @@ App.Views.ItemView = Backbone.View.extend({
     tagName: 'tr',
 
     initialize: function () {
-        this.render();
+        this.template = _.template($('#item-template').html());
     },
 
     render: function() {
-        var template = _.template($('#item-template').html());
-        this.$el.html(template({model: this.model}));
+        this.$el.empty();
+        this.$el.append(this.template({model: this.model}));
         return this;
     },
 
     addToBucket: function(e) {
         this.model.quantity = parseInt($(e.target).closest('td').find('.quantity-number').val());
-        App.globals.bucket.collection.add(this.model);
-        
+        App.globals.bucket.collection.add(this.model, {merge: true});
     },
 
     incrementQuantity: function(e) {
