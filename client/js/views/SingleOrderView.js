@@ -6,7 +6,7 @@ App.Views.SingleOrderView = Backbone.View.extend({
     },
 
     render: function() {
-        this.$el.empty();
+        this.$el.empty().removeData();
         this.$el.append(this.template({model: this.model}));
         return this;
     }

@@ -57,6 +57,7 @@ App.Models.User = Backbone.Model.extend({
         city: '',
         country: '',
         street: '',
-        zip: ''
+        zip: '',
+        isAdmin: false
     }
 });

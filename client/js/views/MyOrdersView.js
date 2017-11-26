@@ -1,6 +1,6 @@
 App.Views.MyOdersView = Backbone.View.extend({
     tagName: 'table',
-    className: 'catalog',
+    className: 'table table-striped order-list',
 
     initialize: function() {
         _.bindAll(this, 'fetch', 'render');

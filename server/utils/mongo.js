@@ -27,7 +27,7 @@ var Wine = new Schema({
     type: { type: String, required: true },
     desc: { type: String },
     image: { type: Images, required: true },
-    availableQuantity: { type: Number, required: true }
+    available: { type: Number, required: true }
 },{ collection: 'wines' });
 
 var User = new Schema({
@@ -40,7 +40,8 @@ var User = new Schema({
     street: { type: String },
     zip: { type: String },
     city: { type: String },
-    country: { type: String }
+    country: { type: String },
+    isAdmin: { type: Boolean }
 });
 
 var Order = new Schema({

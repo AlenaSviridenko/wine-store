@@ -23,8 +23,9 @@ App.Views.NewItemView = Backbone.Epoxy.View.extend({
         'select[name="type"]': 'value:type',
         'input[name="country"]': 'value:country',
         'textarea[name="desc"]': 'value:desc',
-        'input[name="image"]': 'value:path',
-        'input[name="quantity"]': 'value:availableQuantity',
+        'input[name="path"]': 'value:path',
+        'input[name="quantity"]': 'value:available',
+        'input[name="year"]': 'value:year',
         'input[name="price"]': 'value:price'
     },
 
@@ -42,11 +43,12 @@ App.Views.NewItemView = Backbone.Epoxy.View.extend({
 
     save: function() {
         if (this.model.isValid(true)) {
-            this.model.image.imgurl = this.model.path;
-            this.model.price = parseInt(this.model.price);
+            this.model.set('image', {imgurl: this.model.path});
+            this.model.set({price: parseInt(this.model.get('price'))});
             this.model.save(null, {
                 success: function () {
-                    alert('Item saved!')
+                    alert('Item saved!');
+                    window.location = '/';
                 }
             })
         }

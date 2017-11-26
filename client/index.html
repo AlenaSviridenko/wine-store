@@ -47,8 +47,8 @@
         <div id="red-bar">
             <div class="wrap">
                 <ul class="logged-in">
-                    <li><a href="/addItem" id="btn-additems" hidden>Add new item</a></li>
-                    <li class="dropdown-head"><a href="/account" id="btn-account" hidden>My Account</a>
+                    <li><a href="/addItem" id="btn-additems">Add new item</a></li>
+                    <li class="dropdown-head"><a href="/account" id="btn-account">My Account</a>
                         <div class="dropdown-content">
                             <a href="/myorders" id="btn-myorders">My orders</a>
                             <a id="btn-logout">Sign out</a>
@@ -63,44 +63,63 @@
                 </ul>
 
                 <ul>
-                    <li><span class="badge"><%= itemsLength %></span><a href="/mybucket" id="mybucket">My bucket</a></li>
+                    <li><span class="label label-default label-sm"><%= itemsLength %></span>&nbsp;<a href="/mybucket" id="mybucket">My bucket</a></li>
                 </ul>
-
                 <ul class="logo">
                     <li><a href="/" id="btn-home"><img src="http:\\localhost:3001\images\logo.png" alt="Winification" /></a></li>
-                    <li><input name="searchBox" placeholder="Search wines" class="span3 searchBox" autocomplete="off"/>
-                        <input type="submit" value="Search" name="search"/>
-                    </li>
+                    <li><input name="searchBox" placeholder="Search wines" class="form-control input-sm searchBox" autocomplete="off"/></li>
+                    <li><input type="submit" value="Search" class="btn btn-sm btn-default" name="search"/></li>
                 </ul>
             </div>
         </div>
     </script>
 
     <script id="item-template" type="text/template">
-        <tr>
-            <td>
+        <td>
+            <div class="image-container">
                 <img class="catalog-image" src="<%= model.image.imgurl %>" />
-            </td>
-            <td>
-                <span><%- model.name %></span>
-                <span><%- model.type %></span>
-                <span><%- model.country %>, <%- model.year %></span>
-                <span><%- model.desc %></span>
-                <span>$ <%- model.price %></span>
-            </td>
-            <td>
-                <div class="input-group">
-                    <span class="input-group-btn">
-                        <button type="button" class="quantity-left-minus btn btn-danger btn-number"  data-type="minus" data-field="">-</button>
-                    </span>
-                    <input type="text" name="quantity" class="quantity-number form-control input-number" value="1" min="1" max="<%= model.availableQuantity %>">
-                    <span class="input-group-btn">
-                        <button type="button" class="quantity-right-plus btn btn-success btn-number" data-type="plus" data-field="">+</button>
-                    </span>
-                </div>
-                <button class="addToBucket" id="<%- model.name %>">Add to cart</button>
-            </td>
-        </tr>
+            </div>
+        </td>
+        <td>
+            <div class="list-container">
+                <ul>
+                    <li>
+                        <label for="name">Name:</label>
+                        <span name="name"><%- model.name %> </span>
+                    </li>
+                    <li>
+                        <label for="type">Type:</label>
+                        <span name="type"><%- model.type %> </span>
+                    </li>
+                    <li>
+                        <label for="country">Country/year:</label>
+                        <span name="country"><%- model.country %>, <%- model.year %> </span>
+                    </li>
+                    <li>
+                        <label for="desc">Description:</label>
+                        <span name="desc"><%- model.desc %> </span>
+                    </li>
+                </ul>
+            </div>
+
+        </td>
+        <td>
+            <span><strong>$ <%- model.price %></strong></span>
+        </td>
+        <td>
+            <div class="input-group">
+                <span class="input-group-btn">
+                    <button type="button" class="quantity-left-minus btn btn-danger btn-number"  data-type="minus" data-field="">-</button>
+                </span>
+                <input type="text" name="quantity" class="quantity-number form-control input-number" value="1" max="<%= model.available %>">
+                <span class="input-group-btn">
+                    <button type="button" class="quantity-right-plus btn btn-success btn-number" data-type="plus" data-field="">+</button>
+                </span>
+            </div>
+        </td>
+        <td>
+            <button class="addToBucket btn btn-md btn-default" id="<%- model.name %>">Add to cart</button>
+        </td>
     </script>
 
     <script id="login-template" type="text/template">
@@ -209,7 +228,7 @@
     </script>
 
     <script id="bucket-template" type="text/template">
-        <table class="catalog">
+        <table class="table table-striped bucket">
             <tbody>
             <tr>
                 <th>Name</th>
@@ -230,161 +249,215 @@
             </tr>
             <% }); %>
             <tr>
-                <td colspan="2">Total Sum:</td>
+                <td class="align-left" colspan="2">Total Sum:</td>
+                <td></td>
                 <td><%= total %></td>
             </tr>
             </tbody>
         </table>
-        <input type="button" id="sendOrder" value="Submit order"/>
+        <input type="button" class="btn btn-default align-left" id="sendOrder" value="Submit order"/>
     </script>
 
     <script id="account-template" type="text/template">
-        <div class="catalog" style="padding-left:20px;">
-            <span name="id" hidden><%= model._id %></span>
-            <div class="form-group">
-                <label for="firstName">First name</label>
-                <span name="firstName" class="display-value"> <%= model.firstName %></span>
-                <input type="text" name="firstName" value="<%= model.firstName %>" class="edit" hidden/>
-                <span class="help-block hidden"></span>
-            </div>
-            <div class="form-group">
-                <label for="lastName">Last name</label>
-                <span name="lastName" class="display-value"> <%= model.lastName %></span>
-                <input type="text" name="lastName" class="edit" value="<%= model.lastName %>" hidden/>
-                <span class="help-block hidden"></span>
-            </div>
-            <div class="form-group">
-                <label for="phone">Phone</label>
-                <span name="phone" class="display-value"> <%= model.phone || 'Not specified' %></span>
-                <input type="text" name="phone" class="edit" value="<%= model.phone %>" hidden/>
-            </div>
-            <div class="form-group">
-                <label for="country">Country</label>
-                <span name="country" class="display-value"> <%= model.country || 'Not specified' %></span>
-                <input type="text" name="country" value="<%= model.country %>" class="edit" hidden/>
-            </div>
-            <div class="form-group">
-                <label for="city">City</label>
-                <span name="city" class="display-value"> <%= model.city || 'Not specified' %></span>
-                <input type="text" name="city" value="<%= model.city %>" class="edit" hidden/>
-            </div>
-            <div class="form-group">
-                <label for="street">Street</label>
-                <span name="street" class="display-value"> <%= model.street || 'Not specified' %></span>
-                <input type="text" name="street" value="<%= model.street %>" class="edit" hidden/>
-            </div>
-            <div class="form-group">
-                <label for="zip">Zip</label>
-                <span name="zip" class="display-value"> <%= model.zip || 'Not specified' %></span>
-                <input type="text" name="zip" value="<%= model.zip %>" class="edit" hidden/>
-            </div>
-            <div class="form-group">
-                <input type="button" name="edit" value="Edit information"/>
-                <input type="button" name="save" class="edit" value="Save" hidden/>
-            </div>
-        </div>
-    </script>
-
-    <script id="newitem-template" type="text/template">
-        <div class="catalog">
-            <div class="form-group">
-                <label for="name">Name</label>
-                <input type="text" name="name"/>
-                <span class="help-block hidden"></span>
-            </div>
-            <div class="form-group">
-                <label for="lastName">Type</label>
-                <select type="text" name="type">
-                    <option value="" disabled selected>Select a type</option>
-                    <optgroup label="Red">
-                        <option value="red sweet">sweet</option>
-                        <option value="red semi-sweet">semi-sweet</option>
-                        <option value="red dry">dry</option>
-                        <option value="red semi-dry">semi-dry</option>
-                    </optgroup>
-                    <optgroup label="Rose">
-                        <option value="rose sweet">sweet</option>
-                        <option value="rose semi-sweet">semi-sweet</option>
-                        <option value="rose dry">dry</option>
-                        <option value="rose semi-dry">semi-dry</option>
-                    </optgroup>
-                    <optgroup label="White">
-                        <option value="white sweet">sweet</option>
-                        <option value="white semi-sweet">semi-sweet</option>
-                        <option value="white dry">dry</option>
-                        <option value="white semi-dry">semi-dry</option>
-                    </optgroup>
-                </select>
-                <span class="help-block hidden"></span>
-            </div>
-            <div class="form-group">
-                <label for="country">Country</label>
-                <input type="text" name="country"/>
-                <span class="help-block hidden"></span>
-            </div>
-            <div class="form-group">
-                <label for="year">Year</label>
-                <input type="text" name="year"/>
-                <span class="help-block hidden"></span>
-            </div>
-            <div class="form-group">
-                <label for="desc">Description</label>
-                <textarea name="desc"></textarea>
-                <span class="help-block hidden"></span>
-            </div>
-            <div class="form-group">
-                <label for="price">Price</label>
-                <input type="text" name="price"/>
-                <span class="help-block hidden"></span>
-            </div>
-            <div class="form-group">
-                <label for="quantity">Available Quantity</label>
-                <input type="text" name="quantity"/>
-                <span class="help-block hidden"></span>
-            </div>
-            <div class="form-group">
-                <label for="path">Image path</label>
-                <input type="text" name="path"/>
-                <span class="help-block hidden"></span>
-            </div>
-            <input type="button" name="save" value="Save" class="btn small success"  style="width: 60px" />
-        </div>
-    </script>
-
-    <script id="order-template" type="text/template">
-        <tr>
-            <th>Name</th>
-            <th>Quantity</th>
-            <th>Total</th>
-        </tr>
-        <% _.each(model.items, function(item) { %>
-        <tr>
-            <td>
-                <span><%= item.details.name + ', ' + item.details.type %></span>
-            </td>
-            <td>
-                <span><%= item.quantity %></span>
-            </td>
-        </tr>
-        <% }); %>
-        <tr>
-            <td colspan="2">Total Sum:</td>
-            <td><%= model.totalSum %></td>
-        </tr>
-    </script>
-
-    <script id="order-list-template" type="text/template">
-        <table class="orders">
+        <table class="add-item table table-striped">
+            <tbody>
+            <tr>
+                <td>
+                    <div class="form-group">
+                        <label for="firstName">First name</label>
+                        <span name="firstName" class="display-value"> <%= model.firstName %></span>
+                        <input type="text" name="firstName" value="<%= model.firstName %>" class="edit form-control"/>
+                        <span class="help-block hidden"></span>
+                    </div>
+                </td>
+                <td>
+                    <div class="form-group">
+                        <label for="lastName">Last name</label>
+                        <span name="lastName" class="display-value"> <%= model.lastName %></span>
+                        <input type="text" name="lastName" class="edit form-control" value="<%= model.lastName %>"/>
+                        <span class="help-block hidden"></span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="form-group">
+                        <label for="phone">Phone</label>
+                        <span name="phone" class="display-value"> <%= model.phone || 'Not specified' %></span>
+                        <input type="text" name="phone" class="edit form-control" value="<%= model.phone %>"/>
+                    </div>
+                </td>
+                <td>
+                    <div class="form-group">
+                        <label for="country">Country</label>
+                        <span name="country" class="display-value"> <%= model.country || 'Not specified' %></span>
+                        <input type="text" name="country" value="<%= model.country %>" class="edit form-control"/>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="form-group">
+                        <label for="city">City</label>
+                        <span name="city" class="display-value"> <%= model.city || 'Not specified' %></span>
+                        <input type="text" name="city" value="<%= model.city %>" class="edit form-control"/>
+                    </div>
+                </td>
+                <td>
+                    <div class="form-group">
+                        <label for="street">Street</label>
+                        <span name="street" class="display-value"> <%= model.street || 'Not specified' %></span>
+                        <input type="text" name="street" value="<%= model.street %>" class="edit form-control"/>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="form-group">
+                        <label for="zip">Zip</label>
+                        <span name="zip" class="display-value"> <%= model.zip || 'Not specified' %></span>
+                        <input type="text" name="zip" value="<%= model.zip %>" class="edit form-control"/>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <div class="form-group">
+                        <input type="button" class="btn btn-default" name="edit" value="Edit information"/>
+                        <input type="button" name="save" class="edit btn btn-default" value="Save"/>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
         </table>
     </script>
 
-    <script id="footer-template" type="text/template">
-        <div class="wrap">
-            <div class="inner">
-                Copyright &copy; 2012 <a href="http://www.awio.com">Awio Web Services LLC</a>. All rights reserved.
-            </div>
-        </div>
+    <script id="newitem-template" type="text/template">
+        <table class="add-item">
+            <tbody>
+            <tr>
+                <td>
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" class="form-control" name="name"/>
+                        <span class="help-block hidden"></span>
+                    </div>
+                </td>
+                <td>
+                    <div class="form-group">
+                        <label for="lastName">Type</label>
+                        <select type="text" class="form-control" name="type">
+                            <option value="" disabled selected>Select a type</option>
+                            <optgroup label="Red">
+                                <option value="red sweet">Sweet</option>
+                                <option value="red semi-sweet">Semi-sweet</option>
+                                <option value="red dry">Dry</option>
+                                <option value="red semi-dry">Semi-dry</option>
+                            </optgroup>
+                            <optgroup label="Rose">
+                                <option value="rose sweet">Sweet</option>
+                                <option value="rose semi-sweet">Semi-sweet</option>
+                                <option value="rose dry">Dry</option>
+                                <option value="rose semi-dry">Semi-dry</option>
+                            </optgroup>
+                            <optgroup label="White">
+                                <option value="white sweet">Sweet</option>
+                                <option value="white semi-sweet">Semi-sweet</option>
+                                <option value="white dry">Dry</option>
+                                <option value="white semi-dry">Semi-dry</option>
+                            </optgroup>
+                            <option value="riesling">Riesling</option>
+                        </select>
+                        <span class="help-block hidden"></span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="form-group">
+                        <label for="country">Country</label>
+                        <input type="text" class="form-control" name="country"/>
+                        <span class="help-block hidden"></span>
+                    </div>
+                </td>
+                <td>
+                    <div class="form-group">
+                        <label for="year">Year</label>
+                        <input type="text" class="form-control" name="year"/>
+                        <span class="help-block hidden"></span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="form-group">
+                        <label for="desc">Description</label>
+                        <textarea name="desc" class="form-control"></textarea>
+                        <span class="help-block hidden"></span>
+                    </div>
+                </td>
+                <td>
+                    <div class="form-group">
+                        <label for="price">Price</label>
+                        <input type="text" class="form-control" name="price"/>
+                        <span class="help-block hidden"></span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="form-group">
+                        <label for="quantity">Available Quantity</label>
+                        <input type="text" class="form-control" name="quantity"/>
+                        <span class="help-block hidden"></span>
+                    </div>
+                </td>
+                <td>
+                    <div class="form-group">
+                        <label for="path">Image path</label>
+                        <input type="text" class="form-control" name="path"/>
+                        <span class="help-block hidden"></span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input type="button" name="save" value="Save" class="btn btn-default"/>
+                </td>
+            </tr>
+            </tbody>
+        </table>
     </script>
+
+    <script id="order-template" type="text/template">
+        <table class="inner-table">
+            <thead>
+            <tr>
+                <th>Details</th>
+                <th>Quantity</th>
+            </tr>
+            </thead>
+            <tbody>
+            <% _.each(model.items, function(item) { %>
+            <tr>
+                <td>
+                    <span name="details"><%= item.details.name + ', ' + item.details.type %></span>
+                </td>
+                <td>
+                    <span name="quantity"><%= item.quantity %></span>
+                </td>
+            </tr>
+            <% }); %>
+            <tr>
+                <td colspan="2">
+                    <strong>Total sum:</strong> $ <%= model.totalSum %>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </script>
+
+    <script id="order-list-template" type="text/template"></script>
 
     <script type="text/javascript">
         $(function() {
@@ -395,12 +468,9 @@
 </head>
 <body>
 
-<div id="header">
-</div>
+<div id="header"></div>
 
 <div id="app"></div>
-
-<div id="footer"></div>
 
 </body>
 

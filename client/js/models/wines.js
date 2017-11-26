@@ -11,6 +11,7 @@ App.Models.Wine = Backbone.Model.extend({
             msg: 'Please enter the country'
         },
         year: {
+            min: 1,
             required: true,
             msg: 'Please enter the year'
         },
@@ -27,7 +28,7 @@ App.Models.Wine = Backbone.Model.extend({
             required: true,
             msg: 'Please set the price'
         },
-        availableQuantity: {
+        available: {
             min: 1,
             required: true,
             msg: 'Please set the available amount'
@@ -41,7 +42,7 @@ App.Models.Wine = Backbone.Model.extend({
     defaults: {
         name:'',
         country:'',
-        year:0,
+        year: 0,
         type:'',
         desc:'',
         image: {
@@ -49,6 +50,6 @@ App.Models.Wine = Backbone.Model.extend({
         },
         path: '',
         price: 0,
-        availableQuantity: 0
+        available: 0
     }
 });

@@ -38,26 +38,34 @@ App.Views.AccountView = Backbone.Epoxy.View.extend({
         this.delegateEvents();
         this.applyBindings();
 
+        $('.edit').hide();
+
         return this;
     },
 
     setEditView: function(e) {
         e.preventDefault();
-
-        $('span.display-value').toggle();
-        $('input[name="edit"]').toggle();
-
-        $('input.edit').toggle();
+        this.toggleEdit();
     },
 
     validateAndSave: function() {
         var self = this;
         if (this.model.isValid(['firstName', 'lastName'])) {
             this.model.save(null, {success: function() {
-                $('span.display-value').toggle();
-                $('input[name="edit"]').toggle();
-                $('input.edit').toggle();
-            }});
+                self.toggleEdit();
+                alert('Information saved')
+            },
+            error: function(err) {
+                alert('Information not saved:' + err.message);
+            }
+            });
         }
+    },
+
+    toggleEdit: function() {
+        $('span.display-value').toggle();
+        $('input[name="edit"]').toggle();
+
+        $('input.edit').toggle();
     }
 });

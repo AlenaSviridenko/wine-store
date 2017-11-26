@@ -28,8 +28,8 @@ App.Views.AppView = Backbone.View.extend({
 
         if (App.session.isLoggedIn()) {
             App.user = JSON.parse(App.session.get('userData'));
-            this.toggleHeaders();
         }
+        this.toggleHeaders();
 
         return this;
     },
@@ -119,11 +119,19 @@ App.Views.AppView = Backbone.View.extend({
     },
 
     toggleHeaders: function() {
-        $('.public').toggle();
-        $('.logged-in').toggle();
+        var public = $('.public');
+        var loggedIn = $('.logged-in');
+        var addItems = $('#btn-additems');
 
-        if(App.user && !App.user.isAdmin) {
-            $('#btn-additems').hide();
+        if(App.user) {
+            public.hide();
+            loggedIn.show();
+            App.user.isAdmin ? addItems.show() : addItems.hide();
+
+        } else {
+            public.show();
+            loggedIn.hide();
+            addItems.hide();
         }
     }
 });

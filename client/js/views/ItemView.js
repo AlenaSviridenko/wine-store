@@ -18,7 +18,7 @@ App.Views.ItemView = Backbone.View.extend({
     },
 
     addToBucket: function(e) {
-        this.model.quantity = parseInt($(e.target).closest('td').find('.quantity-number').val());
+        this.model.quantity = parseInt($(e.target).closest('td').prev('td').find('.quantity-number').val());
         App.globals.bucket.collection.add(this.model, {merge: true});
     },
 
@@ -27,8 +27,11 @@ App.Views.ItemView = Backbone.View.extend({
         var $quantity = $(e.target).closest('div').find('.quantity-number');
 
         var quantity = parseInt($quantity.val());
+        if (quantity + 1 > this.model.available) {
+            return;
+        }
 
-        $quantity.val(quantity + 1);
+        $quantity.val(quantity + 1).change();
     },
 
     decrementQuantity: function(e) {
@@ -36,10 +39,10 @@ App.Views.ItemView = Backbone.View.extend({
         var $quantity = $(e.target).closest('div').find('.quantity-number');
 
         var quantity = parseInt($quantity.val());
-        if (quantity - 1 < 0) {
+        if (quantity - 1 <= 0) {
             return;
         }
 
-        $quantity.val(quantity - 1);
+        $quantity.val(quantity - 1).change();
     }
 });

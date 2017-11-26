@@ -68,11 +68,10 @@ App.Views.BucketView = Backbone.View.extend({
 
             order.save(null, {
                 success: function (result) {
-                    console.log('Success');
                     self.collection.reset();
                     self.fireSubscription();
                     App.router.navigate('', true);
-                    alert('Success');
+                    alert('Order has sent successfully');
                 }
             })
         }

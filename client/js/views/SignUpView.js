@@ -22,6 +22,7 @@ App.Views.SignUpView = Backbone.Epoxy.View.extend({
         e.preventDefault();
 
         if (this.model.isValid(true)) {
+            var self = this;
             var data = {
                 username: this.model.get('username'),
                 firstName: this.model.get('firstName'),
@@ -30,8 +31,12 @@ App.Views.SignUpView = Backbone.Epoxy.View.extend({
                 password: this.model.get('password')
             };
 
-            $.post('/users', { data: data }, function(data) {
-                App.user = data.user;
+            $.post('/users', { data: data }, function(data, response) {
+                if(data && data.user && data.sid) {
+                    App.user = data.user;
+                    App.session.save(data.sid, data.user);
+                    self.toggleHeaders();
+                }
                 $('#modal').modal('toggle');
             })
                 .fail(function() {
@@ -46,7 +51,9 @@ App.Views.SignUpView = Backbone.Epoxy.View.extend({
         var self = this;
 
         $.get(url)
-            .then(function() {}, function () {
+            .then(function() {
+                Backbone.Validation.callbacks.valid(self, 'username', 'name');
+            }, function () {
                 Backbone.Validation.callbacks.invalid(self, 'username', 'username already exists', 'name');
             });
     },
@@ -58,5 +65,13 @@ App.Views.SignUpView = Backbone.Epoxy.View.extend({
         'input#email': 'value:email',
         'input#password': 'value:password',
         'input#confirmPassword': 'value:confirmPassword'
+    },
+    toggleHeaders: function() {
+        $('.public').toggle();
+        $('.logged-in').toggle();
+
+        if(App.user && !App.user.isAdmin) {
+            $('#btn-additems').hide();
+        }
     }
 });

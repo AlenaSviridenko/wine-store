@@ -95,14 +95,6 @@ app.get('/wines', function(req, res) {
 });
 
 app.post('/wines', function(req, res) {
-    if (!req.session.user) {
-        var details = {
-            code: 403,
-            error: Errors.Forbidden
-        };
-        errorHandler(res, req, details);
-    }
-
     var wine = new WineModel({
         name: req.body.name,
         country: req.body.country,
@@ -110,8 +102,8 @@ app.post('/wines', function(req, res) {
         type: req.body.type,
         desc: req.body.desc,
         price: req.body.price,
-        availableQuantity: req.body.availableQuantity,
-        image: new ImageModel({imgurl: req.body.image})
+        available: req.body.available,
+        image: new ImageModel({imgurl: req.body.path})
     });
 
     wine.save(function (err) {
@@ -137,18 +129,19 @@ app.post('/wines', function(req, res) {
 });
 
 app.post('/users', function(req, res) {
+    var userData = req.body.data;
     var user = new UserModel({
-        username: req.body.username,
-        password: getHash(req.body.password),
-        email: req.body.email,
-        firstName: req.body.firstName,
-        lastName: req.body.lastName
+        username: userData.username,
+        password: getHash(userData.password),
+        email: userData.email,
+        firstName: userData.firstName,
+        lastName: userData.lastName
     });
 
     user.save(function (err) {
         if (!err) {
             req.session.user = user;
-            return res.send({ status: 'OK', user: user });
+            return res.send({ status: 'OK', user: user, sid: req.sessionID });
         } else {
             var details = {
                 code: 0,
@@ -189,6 +182,43 @@ app.get('/users', function(req, res) {
     }
 });
 
+app.put('/users/:id', function(req, res) {
+    UserModel.findById(req.params.id, function(err, user) {
+        if (!user) {
+            var details = {
+                code: 404,
+                error: Errors.UserNotFound
+            };
+            errorHandler(res, req, details);
+        }
+
+        if (user) {
+            user.address = user.address || {};
+
+            user.firstName = req.body.firstName;
+            user.lastName = req.body.lastName;
+            user.phone = req.body.phone || '';
+            user.street = req.body.street || '';
+            user.zip = req.body.zip || '';
+            user.city = req.body.city || '';
+            user.country = req.body.country || '';
+
+            user.save(user, function(err) {
+                if (err) {
+                    var details = {
+                        code: 500,
+                        error: Errors.Internal
+                    };
+                    errorHandler(res, req, details);
+                }
+                res.statusCode = 200;
+                return res.send({status: 'OK', user: user});
+            })
+
+        }
+    });
+});
+
 app.post('/logout', function(req, res) {
     req.session.destroy();
     res.writeHead(200);
@@ -196,14 +226,6 @@ app.post('/logout', function(req, res) {
 });
 
 app.post('/orders', function(req, res) {
-    if (!req.session.user) {
-        var details = {
-            code: 403,
-            error: Errors.Forbidden
-        };
-        errorHandler(res, req, details);
-    }
-
     var order = new OrderModel({
         userId: req.body.userId,
         totalSum: req.body.totalSum,
@@ -230,8 +252,8 @@ app.post('/orders', function(req, res) {
                         return res._id.equals(mongoose.Types.ObjectId(item.itemId));
                     })[0];
 
-                    var newQuantity = model.toJSON().availableQuantity - item.quantity;
-                    model.set({availableQuantity: newQuantity});
+                    var newQuantity = model.toJSON().available - item.quantity;
+                    model.set({available: newQuantity});
 
                     promises.push(model.save());
                 });
@@ -273,14 +295,6 @@ app.post('/orders', function(req, res) {
 });
 
 app.get('/orders', function(req, res) {
-    if (!req.session.user) {
-        var details = {
-            code: 403,
-            error: Errors.Forbidden
-        };
-        errorHandler(res, req, details);
-    }
-
     var query = req.query;
     return OrderModel.find(query, function(err, orders) {
         var asyncOperations = [];
@@ -351,5 +365,5 @@ var errorHandler = function (res, req, details, err) {
     var codeError = err ? err.message : '';
     log.error(details.error + '(%d): %s', res.statusCode, codeError);
     return res.send({ error: details.error });
-}
+};
 
