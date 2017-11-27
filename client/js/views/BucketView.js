@@ -15,7 +15,7 @@ App.Views.BucketView = Backbone.View.extend({
     },
 
     render: function() {
-        $(this.el).html(this.template({collection: this.collection.toJSON(), total: this.countTotal()}))
+        this.$el.html(this.template({collection: this.collection.toJSON(), total: this.countTotal()}))
     },
 
     countTotal: function() {

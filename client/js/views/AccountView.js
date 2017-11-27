@@ -15,6 +15,7 @@ App.Views.AccountView = Backbone.Epoxy.View.extend({
     },
 
     initialize: function() {
+        _.bindAll(this, 'validateAndSave', 'setEditView');
         Backbone.Validation.bind(this);
         this.listenTo(this.model, 'sync', this.render);
     },

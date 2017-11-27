@@ -15,6 +15,7 @@ App.Views.NewItemView = Backbone.Epoxy.View.extend({
     },
 
     initialize: function() {
+        _.bindAll(this, 'save', 'close');
         Backbone.Validation.bind(this);
     },
 

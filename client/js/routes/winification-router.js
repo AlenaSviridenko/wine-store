@@ -1,19 +1,17 @@
 WinificationRouter = Backbone.Router.extend({
     routes: {
-        "":                                 "index",
-        "mybucket":                             "bucket",
-        "tag/:tag":                             "tag",
-        "mytags":                               "tags",
-        "search/*search":                       "search",
-        "account":                              "account",
-        "addItem":                  "addItem",
-        "myorders": 'myorders'
+        '': 'index',
+        'mybucket': 'bucket',
+        'search/*search': 'search',
+        'account': 'account',
+        'addItem': 'addItem',
+        'myorders': 'myorders'
     },
 
     views: {},
 
     initialize: function() {
-        _.bindAll(this, 'index', 'bucket', 'myorders',  'setBody');
+        _.bindAll(this, 'index', 'bucket', 'myorders', 'search', 'addItem', 'account');
 
         this.views.app = new App.Views.AppView();
         this.views.public = new App.Views.PublicView();
@@ -94,18 +92,5 @@ WinificationRouter = Backbone.Router.extend({
         this.currentView = view;
 
         return this;
-    },
-
-    setBody: function(view) {
-        if (auth == true && typeof App.user == 'undefined') {
-            this.navigate("", true);
-            return;
-        }
-
-        if (typeof this.view.body != 'undefined')
-            this.view.body.unrender();
-
-        this.view.body = view;
     }
-
 });

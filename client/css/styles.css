@@ -59,8 +59,8 @@ body {
     width: 400px;
     max-width: 400px;
     z-index: 100;
-    position: fixed; /* Stay in place */
-    left: 30%;
+    position: fixed;
+    left: 40%;
     margin-top: 30px;
 }
 

@@ -8,6 +8,7 @@ App.Views.ItemView = Backbone.View.extend({
     tagName: 'tr',
 
     initialize: function () {
+        _.bindAll(this, 'addToBucket', 'incrementQuantity', 'decrementQuantity');
         this.template = _.template($('#item-template').html());
     },
 

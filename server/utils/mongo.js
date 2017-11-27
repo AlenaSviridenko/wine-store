@@ -1,4 +1,4 @@
-var mongoose = require('mongoose');//.set('debug', true);
+var mongoose = require('mongoose');
 var log = require('./log')(module);
 var config = require('../config.json');
 
@@ -9,7 +9,7 @@ db.on('error', function (err) {
     log.error('connection error:', err.message);
 });
 db.once('open', function callback () {
-    log.info("Connected to DB!");
+    log.info('Connected to DB!');
 });
 
 var Schema = mongoose.Schema;
@@ -28,7 +28,7 @@ var Wine = new Schema({
     desc: { type: String },
     image: { type: Images, required: true },
     available: { type: Number, required: true }
-},{ collection: 'wines' });
+});
 
 var User = new Schema({
     username: { type: String, required: true },
@@ -50,11 +50,11 @@ var Order = new Schema({
         {
             itemId: { type: String, required: true },
             quantity: { type: Number, required: true },
-            details: { type: Wine },
+            details: { type: Wine }
         }
     ],
     totalSum: { type: Number, required: true }
-},{ collection: 'orders' });
+});
 
 module.exports.WineModel = mongoose.model('Wines', Wine);
 module.exports.ImageModel = mongoose.model('Images', Images);

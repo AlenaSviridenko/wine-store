@@ -1,17 +1,16 @@
 App.Views.AppView = Backbone.View.extend({
-
     el: '#header',
 
     events: {
-        "click  #btn-home": "home",
-        "click  #btn-mybucket": "mybucket",
-        "click  #btn-account": "account",
-        "click  #btn-logout": "logout",
-        "click  #btn-additems": 'addItem',
-        "click  #btn-myorders": 'myOrders',
-        "click #login": "toggleLogin",
-        "click #signup": "toggleSignup",
-        "submit #frm-login": "login",
+        'click #btn-home': 'home',
+        'click #btn-mybucket': 'mybucket',
+        'click #btn-account': 'account',
+        'click #btn-logout': 'logout',
+        'click #btn-additems': 'addItem',
+        'click #btn-myorders': 'myOrders',
+        'click #login': 'toggleLogin',
+        'click #signup': 'toggleSignup',
+        'submit #frm-login': 'login',
         'click input[name="search"]': 'search'
     },
 
@@ -47,7 +46,6 @@ App.Views.AppView = Backbone.View.extend({
     mybucket: function(e) {
         e.preventDefault();
         App.router.navigate('mybucket', true);
-        //new EditView({ model: new Bookmark() }).render();
     },
 
     account: function(e) {
